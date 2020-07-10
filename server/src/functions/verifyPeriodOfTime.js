@@ -1,8 +1,7 @@
 const moment = require("moment")
 
 const verifyPeriodOfTime = (req, res, next) => {
-  const period = req.body.period
-
+  const period = req.query.period
   // The date field which will be filtered in enterprises, shipments, driverSchedules
   let createdTimeField = "createdTime"
 
@@ -14,7 +13,9 @@ const verifyPeriodOfTime = (req, res, next) => {
 
   //  Filter date between two dates
   if (period === "interval") {
-    const { startDate, endDate } = req.body.params
+    const { startDate, endDate } = JSON.parse(
+      decodeURIComponent(req.query.params)
+    )
     dateConstraint = {
       [createdTimeField]: {
         $gte: new Date(startDate),
@@ -25,7 +26,7 @@ const verifyPeriodOfTime = (req, res, next) => {
 
   // Filter date from start to end of one day
   if (period === "one") {
-    const { date } = req.body.params
+    const { date } = JSON.parse(decodeURIComponent(req.query.params))
     dateConstraint = {
       [createdTimeField]: {
         $gte: new Date(date),

@@ -48,6 +48,12 @@ Connected to database!
 
 ### Client
 
+Create an `.env` file inside client folder. It looks like:
+
+```bash
+REACT_APP_APIURL=http://192.168.1.X:<SERVER_PORT>
+```
+
 Open a terminal and run the following commands:
 
 ```bash
@@ -77,34 +83,74 @@ This project have six endpoints implemented:
 
 1. Home: `/`, this endpoint has a get method, just to know that our server is running.
 
-2. The other five endpoints have the same structure, like this: `/<field>/download` where `<field>` can be `customers`, `drivers`, `enterprises`, `shipments` or `driverSchedules`.
+2. The other five endpoints have the same structure, like this: `/<field>/download`. Where `<field>` can be `customers`, `drivers`, `enterprises`, `shipments` or `driverSchedules`.
 
-   These endpoints has a post method and it serves to download the csv files using params to modify the date range. They accept a payload, like the next examples:
+   These endpoints has a get method and it serves to download the csv files using query params to modify the date range. The structure of the query is as follows:
 
-   - To get all the data available:
+   ```
+   /<field>/download?period=<periodOfTime>&params=<dateParams>
+   ```
+
+   Where:
+
+   - `<periodOfTime>` can be `all`, `one` or `interval`.
+
+   - `<dateParams>` can be
+
      ```json
      {
-       "period": "all"
+       "date": "2019-03-07T04:00:00.000Z"
      }
+     ```
+
+     or
+
+     ```json
+     {
+       "startDate": "2019-03-07T04:00:00.000Z",
+       "endDate": "2019-04-25T04:00:00.000Z"
+     }
+     ```
+
+     or just be `null`. The `<dateParams>` field have to be stringified using the `JSON.stringify()` function and then be passed to the `encodeURIComponent()` function in order to send this field as an string encoded.
+
+   Here are some examples:
+
+   - To get all data:
+     ```
+     /<field>/download?period=all&params=null
      ```
    - To get data from just one day:
+
+     If our `<dateParams>` is:
+
      ```json
      {
-       "period": "one",
-       "params": {
-         "date": "2019-03-07T04:00:00.000Z"
-       }
+       "date": "2020-05-15T04:00:00.000Z"
      }
      ```
+
+     Thus, we have:
+
+     ```
+     /<field>/download?period=one&params=%7B%22date%22%3A%222020-05-15T04%3A00%3A00.000Z%22%7D
+     ```
+
    - To get data from an interval of dates:
+
+     If our `<dateParams>` is:
+
      ```json
      {
-       "period": "interval",
-       "params": {
-         "startDate": "2019-03-07T04:00:00.000Z",
-         "endDate": "2019-04-25T04:00:00.000Z"
-       }
+       "startDate": "2020-05-15T04:00:00.000Z",
+       "endDate": "2020-06-02T04:00:00.000Z"
      }
+     ```
+
+     Thus, we have:
+
+     ```
+     /<field>/download?period=interval&params=%7B%22startDate%22%3A%222020-05-15T04%3A00%3A00.000Z%22%2C%22endDate%22%3A%222020-06-02T04%3A00%3A00.000Z%22%7D
      ```
 
 ## Notes

@@ -318,7 +318,7 @@ controller.download = async (req, res) => {
     shipments.map(async (shipment, index) => ({
       index: index + 1,
       shipmentID: shipment._id,
-      registerDate: getTimeInFormat(shipment.createdTime),
+      registerDate: getTimeInFormat(shipment.createdTime, "DD-MM-YYYY"),
       state: shipment.requestState,
       requestType: shipment.requestType,
       driverID: shipment.driverId,
