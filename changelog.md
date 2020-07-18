@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.0a
+
+### Hotfix
+
+- Dependencies have been upgraded (Dependabot alerts).
+
 ## 3.1.0
 
 ### Added
