@@ -5,6 +5,7 @@ import { ThemeProvider } from "@material-ui/core"
 import { LocalizationProvider } from "@material-ui/pickers"
 import MomentUtils from "@material-ui/pickers/adapter/moment"
 import { renderRoutes } from "react-router-config"
+import WebFont from "webfontloader"
 import "moment/locale/es-do"
 
 import configureStore from "./configureStore"
@@ -12,6 +13,12 @@ import routes from "./routes"
 import theme from "./theme"
 
 const store = configureStore()
+
+WebFont.load({
+  google: {
+    families: ["Quicksand:400,500", "sans-serif"],
+  },
+})
 
 const App = () => {
   return (

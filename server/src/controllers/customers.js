@@ -56,34 +56,33 @@ const fields = [
   },
 ]
 
-const controller = {}
+module.exports = {
+  download: async (req, res) => {
+    const dateConstraint = req.dateConstraint
 
-controller.download = async (req, res) => {
-  const dateConstraint = req.dateConstraint
-  const customers = await Customer.find(
-    { ...dateConstraint },
-    { _id: 1, details: 1, businessType: 1, contactPerson: 1, address: 1 }
-  )
+    const customers = await Customer.find(
+      { ...dateConstraint },
+      { _id: 1, details: 1, businessType: 1, contactPerson: 1, address: 1 }
+    )
 
-  const data = customers.map(
-    ({ _id, details, businessType, contactPerson, address }, index) => ({
-      index: index + 1,
-      customerID: _id,
-      registerDate: getTimeInFormat(details.createdTime, "DD-MM-YYYY"),
-      customerName: `${details.firstName} ${details.lastName}`,
-      rut: details.rut,
-      email: details.email,
-      phone: details.phone,
-      platform: details.deviceType,
-      birthday: getTimeInFormat(details.birthDate, "DD-MM-YYYY"),
-      customerType: businessType === "" ? "customer" : "enterprise",
-      businessType,
-      contactPerson,
-      address,
-    })
-  )
+    const data = customers.map(
+      ({ _id, details, businessType, contactPerson, address }, index) => ({
+        index: index + 1,
+        customerID: _id,
+        registerDate: getTimeInFormat(details.createdTime, "DD-MM-YYYY"),
+        customerName: `${details.firstName} ${details.lastName}`,
+        rut: details.rut,
+        email: details.email,
+        phone: details.phone,
+        platform: details.deviceType,
+        birthday: getTimeInFormat(details.birthDate, "DD-MM-YYYY"),
+        customerType: businessType === "" ? "customer" : "enterprise",
+        businessType,
+        contactPerson,
+        address,
+      })
+    )
 
-  return downloadResource(res, "customers.csv", fields, data)
+    return downloadResource(res, "customers.csv", fields, data)
+  },
 }
-
-module.exports = controller

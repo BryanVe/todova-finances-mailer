@@ -115,51 +115,53 @@ const getDriverName = async (driverId) => {
   else return `${driver.details.firstName} ${driver.details.lastName}`
 }
 
-const controller = {}
-
-controller.download = async (req, res) => {
-  const dateConstraint = req.dateConstraint
-  const driverSchedules = await DriverSchedule.find(
-    { ...dateConstraint },
-    {
-      _id: 1,
-      createdTime: 1,
-      driverId: 1,
-      startTime: 1,
-      endTime: 1,
-      minDriverPay: 1,
-    }
-  )
-
-  const data = await Promise.all(
-    driverSchedules.map(async (driverSchedule, index) => {
-      const totalDriverProfit = await getTotalDriverProfitShipment(
-        driverSchedule.driverId,
-        driverSchedule.startTime,
-        driverSchedule.endTime
-      )
-      const shouldPayToDriver = driverSchedule.minDriverPay - totalDriverProfit
-      const shipmentDriverProfitTurn =
-        shouldPayToDriver < 0 ? shouldPayToDriver * -1 : 0
-
-      return {
-        index: index + 1,
-        driverID: driverSchedule.driverId,
-        registerDate: getTimeInFormat(driverSchedule.createdTime, "DD-MM-YYYY"),
-        driverName: await getDriverName(driverSchedule.driverId),
-        startDate: getTimeInFormat(driverSchedule.startTime, "DD-MM-YYYY"),
-        startTime: getTimeInFormat(driverSchedule.startTime, "HH:mm"),
-        endDate: getTimeInFormat(driverSchedule.endTime, "DD-MM-YYYY"),
-        endTime: getTimeInFormat(driverSchedule.endTime, "HH:mm"),
-        minDriverPay: driverSchedule.minDriverPay,
-        totalDriverProfitTurn: totalDriverProfit,
-        shipmentDriverProfitTurn,
-        shouldPayToDriver: shouldPayToDriver > 0 ? shouldPayToDriver : 0,
+module.exports = {
+  download: async (req, res) => {
+    const dateConstraint = req.dateConstraint
+    const driverSchedules = await DriverSchedule.find(
+      { ...dateConstraint },
+      {
+        _id: 1,
+        createdTime: 1,
+        driverId: 1,
+        startTime: 1,
+        endTime: 1,
+        minDriverPay: 1,
       }
-    })
-  )
+    )
 
-  return downloadResource(res, "driverSchedules.csv", fields, data)
+    const data = await Promise.all(
+      driverSchedules.map(async (driverSchedule, index) => {
+        const totalDriverProfit = await getTotalDriverProfitShipment(
+          driverSchedule.driverId,
+          driverSchedule.startTime,
+          driverSchedule.endTime
+        )
+        const shouldPayToDriver =
+          driverSchedule.minDriverPay - totalDriverProfit
+        const shipmentDriverProfitTurn =
+          shouldPayToDriver < 0 ? shouldPayToDriver * -1 : 0
+
+        return {
+          index: index + 1,
+          driverID: driverSchedule.driverId,
+          registerDate: getTimeInFormat(
+            driverSchedule.createdTime,
+            "DD-MM-YYYY"
+          ),
+          driverName: await getDriverName(driverSchedule.driverId),
+          startDate: getTimeInFormat(driverSchedule.startTime, "DD-MM-YYYY"),
+          startTime: getTimeInFormat(driverSchedule.startTime, "HH:mm"),
+          endDate: getTimeInFormat(driverSchedule.endTime, "DD-MM-YYYY"),
+          endTime: getTimeInFormat(driverSchedule.endTime, "HH:mm"),
+          minDriverPay: driverSchedule.minDriverPay,
+          totalDriverProfitTurn: totalDriverProfit,
+          shipmentDriverProfitTurn,
+          shouldPayToDriver: shouldPayToDriver > 0 ? shouldPayToDriver : 0,
+        }
+      })
+    )
+
+    return downloadResource(res, "driverSchedules.csv", fields, data)
+  },
 }
-
-module.exports = controller

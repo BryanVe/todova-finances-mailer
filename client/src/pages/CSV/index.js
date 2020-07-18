@@ -1,1 +1,1 @@
-export { default } from "./CSV"
+export { default } from "./DownloadCSV"

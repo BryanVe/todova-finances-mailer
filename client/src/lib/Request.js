@@ -1,6 +1,6 @@
 import axios from "axios"
-
-axios.defaults.baseURL = "http://localhost:4000/"
+import { apiUrl } from "config/development"
+axios.defaults.baseURL = apiUrl
 
 const Get = async (route, params = {}) => {
   try {

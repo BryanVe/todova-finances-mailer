@@ -44,36 +44,34 @@ const fields = [
   },
 ]
 
-const controller = {}
+module.exports = {
+  download: async (req, res) => {
+    const dateConstraint = req.dateConstraint
+    const enterprises = await Enterprise.find(
+      { ...dateConstraint },
+      {
+        _id: 1,
+        createdTime: 1,
+        company: 1,
+        userManagement: 1,
+      }
+    )
 
-controller.download = async (req, res) => {
-  const dateConstraint = req.dateConstraint
-  const enterprises = await Enterprise.find(
-    { ...dateConstraint },
-    {
-      _id: 1,
-      createdTime: 1,
-      company: 1,
-      userManagement: 1,
-    }
-  )
+    const data = enterprises.map(
+      ({ _id, createdTime, company, userManagement }, index) => ({
+        index: index + 1,
+        enterpriseID: _id,
+        registerDate: getTimeInFormat(createdTime, "DD-MM-YYYY"),
+        companyName: company.name,
+        rut: company.rut,
+        giro: company.giro,
+        address: company.addressInfo.direction,
+        contactName: `${userManagement[0].firstName} ${userManagement[0].lastName}`,
+        contactNumber: userManagement[0].phone,
+        contactEmail: userManagement[0].email,
+      })
+    )
 
-  const data = enterprises.map(
-    ({ _id, createdTime, company, userManagement }, index) => ({
-      index: index + 1,
-      enterpriseID: _id,
-      registerDate: getTimeInFormat(createdTime, "DD-MM-YYYY"),
-      companyName: company.name,
-      rut: company.rut,
-      giro: company.giro,
-      address: company.addressInfo.direction,
-      contactName: `${userManagement[0].firstName} ${userManagement[0].lastName}`,
-      contactNumber: userManagement[0].phone,
-      contactEmail: userManagement[0].email,
-    })
-  )
-
-  return downloadResource(res, "enterprises.csv", fields, data)
+    return downloadResource(res, "enterprises.csv", fields, data)
+  },
 }
-
-module.exports = controller

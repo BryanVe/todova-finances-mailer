@@ -7,7 +7,8 @@ import AuthLayout from "./layouts/Auth"
 import DashboardLayout from "./layouts/Dashboard"
 // import DashboardDefaultView from "./pages/DashboardDefault"
 import OverviewView from "./pages/Overview"
-import CSVView from "./pages/CSV"
+import DownloadCSVView from "./pages/CSV"
+import DatabaseConfigView from "./pages/Configuration"
 // import PresentationView from "./pages/Presentation"
 
 const routes = [
@@ -66,7 +67,12 @@ const routes = [
       {
         path: "/csv/download",
         exact: true,
-        component: CSVView,
+        component: DownloadCSVView,
+      },
+      {
+        path: "/configuration/database",
+        exact: true,
+        component: DatabaseConfigView,
       },
       // {
       //   component: () => <Redirect to='/errors/error-404' />,

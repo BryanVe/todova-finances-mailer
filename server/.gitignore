@@ -1,3 +1,5 @@
 /node_modules
+
+/src/assets/bash/mongo-sync/
 .env
 .env.development

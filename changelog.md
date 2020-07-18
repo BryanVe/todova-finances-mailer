@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.1.0
+
+### Added
+
+- A bash script that allow us to synchronize our database local with the database remote.
+- Now we can emit events with [`socket.io`](https://socket.io/) in order to broadcast the bash file execution to our app.
+- The module for synchronize the database is ready to use.
+
 ## 3.0.0
 
 ### Updated
@@ -8,7 +16,7 @@
 
 ### Added
 
-- A `jsconfing.json` file that allows us to access to the paths from other files more easily.
+- A `jsconfig.json` file that allows us to access to the paths from other files more easily.
 - A topbar and sidebar in order to navigate through the different modules.
 - A basic login form in order to access to the dashboard.
 - The module for downloading CSV files is ready to use.

@@ -288,136 +288,134 @@ const getDropoffTimes = (packages) => {
   return str
 }
 
-const controller = {}
+module.exports = {
+  download: async (req, res) => {
+    const dateConstraint = req.dateConstraint
+    const shipments = await Shipment.find(
+      { ...dateConstraint },
+      {
+        _id: 1,
+        createdTime: 1,
+        requestState: 1,
+        requestType: 1,
+        driverId: 1,
+        customerId: 1,
+        customerType: 1,
+        pickupInfo: 1,
+        packages: 1,
+        travelDistance: 1,
+        activeDeliveryType: 1,
+        price: 1,
+        actionHistory: 1,
+        timeAtShipmentCompleted: 1,
+        metadata: 1,
+        supportImages: 1,
+      }
+    )
 
-controller.download = async (req, res) => {
-  const dateConstraint = req.dateConstraint
-  const shipments = await Shipment.find(
-    { ...dateConstraint },
-    {
-      _id: 1,
-      createdTime: 1,
-      requestState: 1,
-      requestType: 1,
-      driverId: 1,
-      customerId: 1,
-      customerType: 1,
-      pickupInfo: 1,
-      packages: 1,
-      travelDistance: 1,
-      activeDeliveryType: 1,
-      price: 1,
-      actionHistory: 1,
-      timeAtShipmentCompleted: 1,
-      metadata: 1,
-      supportImages: 1,
-    }
-  )
-
-  const data = await Promise.all(
-    shipments.map(async (shipment, index) => ({
-      index: index + 1,
-      shipmentID: shipment._id,
-      registerDate: getTimeInFormat(shipment.createdTime, "DD-MM-YYYY"),
-      state: shipment.requestState,
-      requestType: shipment.requestType,
-      driverID: shipment.driverId,
-      driverName: await getDriverName(shipment.driverId),
-      customerID: shipment.customerId,
-      customerName: await getCustomerName(shipment.customerId),
-      customerType: shipment.customerType,
-      pickupLocation: shipment.pickupInfo.direction,
-      dropoffLocation: getDropoffDirections(shipment.packages),
-      packageState: getDropoffStates(shipment.packages),
-      kilometers: shipment.travelDistance,
-      deliveryType: shipment.activeDeliveryType,
-      plan: shipment.price.priceModelUsed,
-      customerPrice: shipment.price.basePriceConsidered
-        ? shipment.price.customerBasePrice
-        : shipment.price.customerPrice,
-      customerWaitingTimeBrute:
-        getShipmentModelTime(
+    const data = await Promise.all(
+      shipments.map(async (shipment, index) => ({
+        index: index + 1,
+        shipmentID: shipment._id,
+        registerDate: getTimeInFormat(shipment.createdTime, "DD-MM-YYYY"),
+        state: shipment.requestState,
+        requestType: shipment.requestType,
+        driverID: shipment.driverId,
+        driverName: await getDriverName(shipment.driverId),
+        customerID: shipment.customerId,
+        customerName: await getCustomerName(shipment.customerId),
+        customerType: shipment.customerType,
+        pickupLocation: shipment.pickupInfo.direction,
+        dropoffLocation: getDropoffDirections(shipment.packages),
+        packageState: getDropoffStates(shipment.packages),
+        kilometers: shipment.travelDistance,
+        deliveryType: shipment.activeDeliveryType,
+        plan: shipment.price.priceModelUsed,
+        customerPrice: shipment.price.basePriceConsidered
+          ? shipment.price.customerBasePrice
+          : shipment.price.customerPrice,
+        customerWaitingTimeBrute:
+          getShipmentModelTime(
+            "customerAccounting",
+            "waitingTime",
+            shipment.packages
+          ) * 1.19,
+        customerAdjustmentBrute:
+          getShipmentModelTime(
+            "customerAccounting",
+            "adjustment",
+            shipment.packages
+          ) * 1.19,
+        customerParkingNet: getShipmentModelTime(
           "customerAccounting",
+          "parkingValue",
+          shipment.packages
+        ),
+        customerTollNet: getShipmentModelTime(
+          "customerAccounting",
+          "tollValue",
+          shipment.packages
+        ),
+        driverPrice: shipment.price.basePriceConsidered
+          ? shipment.price.driverBasePrice
+          : shipment.price.driverPrice,
+        driverWaitingTimeBrute: getShipmentModelTime(
+          "driverAccounting",
           "waitingTime",
           shipment.packages
-        ) * 1.19,
-      customerAdjustmentBrute:
-        getShipmentModelTime(
-          "customerAccounting",
+        ),
+        driverAdjustmentBrute: getShipmentModelTime(
+          "driverAccounting",
           "adjustment",
           shipment.packages
-        ) * 1.19,
-      customerParkingNet: getShipmentModelTime(
-        "customerAccounting",
-        "parkingValue",
-        shipment.packages
-      ),
-      customerTollNet: getShipmentModelTime(
-        "customerAccounting",
-        "tollValue",
-        shipment.packages
-      ),
-      driverPrice: shipment.price.basePriceConsidered
-        ? shipment.price.driverBasePrice
-        : shipment.price.driverPrice,
-      driverWaitingTimeBrute: getShipmentModelTime(
-        "driverAccounting",
-        "waitingTime",
-        shipment.packages
-      ),
-      driverAdjustmentBrute: getShipmentModelTime(
-        "driverAccounting",
-        "adjustment",
-        shipment.packages
-      ),
-      driverParkingNet: getShipmentModelTime(
-        "driverAccounting",
-        "parkingValue",
-        shipment.packages
-      ),
-      driverTollNet: getShipmentModelTime(
-        "driverAccounting",
-        "tollValue",
-        shipment.packages
-      ),
-      acceptTime: getActionHistoryFormat(
-        shipment.actionHistory,
-        "accepted",
-        "HH:mm"
-      ),
-      dropoffTime: getDropoffTimes(shipment.packages),
-      completeDate: getCompletedTimeFormat(
-        shipment.actionHistory,
-        shipment.timeAtShipmentCompleted,
-        "YYYY-MM-DD"
-      ),
-      completeTime: getCompletedTimeFormat(
-        shipment.actionHistory,
-        shipment.timeAtShipmentCompleted,
-        "HH:mm"
-      ),
-      emailDate: !!shipment.metadata.emailDatetime
-        ? getTimeInFormat(shipment.metadata.emailDatetime, "DD-MM-YYYY")
-        : "",
-      dropoffSize: shipment.packages.length,
-      emailTime: !!shipment.metadata.emailDatetime
-        ? getTimeInFormat(shipment.metadata.emailDatetime, "HH:mm")
-        : "",
-      haveAPicture:
-        shipment.supportImages.length ||
-        shipment.packages.some((pack) => pack.supportImages.length)
-          ? "Yes"
-          : "No",
-      dispatchImage: getImagePosition("dispatch_image", shipment),
-      parkingImage: getImagePosition("parking_image", shipment),
-      tollgateImage: getImagePosition("tollgate_image", shipment),
-      otherImage: getImagePosition("other_image", shipment),
-      customerReturnPrice: shipment.price.customerReturnPrice,
-      driverReturnPrice: shipment.price.driverReturnPrice,
-    }))
-  )
+        ),
+        driverParkingNet: getShipmentModelTime(
+          "driverAccounting",
+          "parkingValue",
+          shipment.packages
+        ),
+        driverTollNet: getShipmentModelTime(
+          "driverAccounting",
+          "tollValue",
+          shipment.packages
+        ),
+        acceptTime: getActionHistoryFormat(
+          shipment.actionHistory,
+          "accepted",
+          "HH:mm"
+        ),
+        dropoffTime: getDropoffTimes(shipment.packages),
+        completeDate: getCompletedTimeFormat(
+          shipment.actionHistory,
+          shipment.timeAtShipmentCompleted,
+          "YYYY-MM-DD"
+        ),
+        completeTime: getCompletedTimeFormat(
+          shipment.actionHistory,
+          shipment.timeAtShipmentCompleted,
+          "HH:mm"
+        ),
+        emailDate: !!shipment.metadata.emailDatetime
+          ? getTimeInFormat(shipment.metadata.emailDatetime, "DD-MM-YYYY")
+          : "",
+        dropoffSize: shipment.packages.length,
+        emailTime: !!shipment.metadata.emailDatetime
+          ? getTimeInFormat(shipment.metadata.emailDatetime, "HH:mm")
+          : "",
+        haveAPicture:
+          shipment.supportImages.length ||
+          shipment.packages.some((pack) => pack.supportImages.length)
+            ? "Yes"
+            : "No",
+        dispatchImage: getImagePosition("dispatch_image", shipment),
+        parkingImage: getImagePosition("parking_image", shipment),
+        tollgateImage: getImagePosition("tollgate_image", shipment),
+        otherImage: getImagePosition("other_image", shipment),
+        customerReturnPrice: shipment.price.customerReturnPrice,
+        driverReturnPrice: shipment.price.driverReturnPrice,
+      }))
+    )
 
-  return downloadResource(res, "shipments.csv", fields, data)
+    return downloadResource(res, "shipments.csv", fields, data)
+  },
 }
-
-module.exports = controller

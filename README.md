@@ -85,7 +85,7 @@ This project have six endpoints implemented:
 
 2. The other five endpoints have the same structure, like this: `/<field>/download`. Where `<field>` can be `customers`, `drivers`, `enterprises`, `shipments` or `driverSchedules`.
 
-   These endpoints has a get method and it serves to download the csv files using query params to modify the date range. The structure of the query is as follows:
+   These endpoints have a get method and it serves to download the csv files using query params to modify the date range. The structure of the query is as follows:
 
    ```
    /<field>/download?period=<periodOfTime>&params=<dateParams>

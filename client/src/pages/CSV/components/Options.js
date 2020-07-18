@@ -227,69 +227,67 @@ const Options = () => {
   }
 
   return (
-    <React.Fragment>
-      <Card>
-        <CardContent>
-          <Grid container spacing={gridFieldsSpacing}>
-            {/* download options selector */}
-            <Grid
-              item
-              md={
-                currentOptionSelected.value !== ""
-                  ? getDateRangeComponent(dateRange).downloadSelectorMd
-                  : 10
-              }
-              xs={12}
+    <Card>
+      <CardContent>
+        <Grid container spacing={gridFieldsSpacing} alignItems='center'>
+          {/* download options selector */}
+          <Grid
+            item
+            md={
+              currentOptionSelected.value !== ""
+                ? getDateRangeComponent(dateRange).downloadSelectorMd
+                : 10
+            }
+            xs={12}
+          >
+            <FormControl
+              fullWidth
+              variant='outlined'
+              className={classes.formControl}
             >
-              <FormControl
-                fullWidth
-                variant='outlined'
-                className={classes.formControl}
-              >
-                <InputLabel>¿Qué deseas descargar?</InputLabel>
-                <Select
-                  value={currentOptionSelected.value}
-                  onChange={(e) => {
-                    setCurrentOptionSelected(
-                      downloadOptions.find(
-                        ({ value }) => value === e.target.value
-                      )
+              <InputLabel>¿Qué deseas descargar?</InputLabel>
+              <Select
+                value={currentOptionSelected.value}
+                onChange={(e) => {
+                  setCurrentOptionSelected(
+                    downloadOptions.find(
+                      ({ value }) => value === e.target.value
                     )
-                  }}
-                  label='¿Qué deseas descargar?'
-                >
-                  {downloadOptions.map(({ label, value }) => (
-                    <MenuItem key={value} value={value}>
-                      {label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            {/* show the period selector */}
-            {showPeriodOfTimeField(currentOptionSelected.value)}
-
-            {/* the download button */}
-            <Grid item md={2} xs={12}>
-              <Button
-                disabled={validateDownload(currentOptionSelected.value)}
-                fullWidth
-                size='large'
-                color='primary'
-                variant='contained'
-                onClick={() => {
-                  downloadResource()
-                  resetPeriodOfTime()
+                  )
                 }}
+                label='¿Qué deseas descargar?'
               >
-                Descargar
-              </Button>
-            </Grid>
+                {downloadOptions.map(({ label, value }) => (
+                  <MenuItem key={value} value={value}>
+                    {label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
-        </CardContent>
-      </Card>
-    </React.Fragment>
+
+          {/* show the period selector */}
+          {showPeriodOfTimeField(currentOptionSelected.value)}
+
+          {/* the download button */}
+          <Grid item md={2} xs={12}>
+            <Button
+              disabled={validateDownload(currentOptionSelected.value)}
+              fullWidth
+              size='large'
+              color='primary'
+              variant='contained'
+              onClick={() => {
+                downloadResource()
+                resetPeriodOfTime()
+              }}
+            >
+              Descargar
+            </Button>
+          </Grid>
+        </Grid>
+      </CardContent>
+    </Card>
   )
 }
 
