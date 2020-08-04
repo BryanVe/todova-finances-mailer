@@ -1,5 +1,5 @@
-const Driver = require("../models/Driver")
-const { downloadResource, getTimeInFormat } = require("../functions/utils")
+const Driver = require("../../models/Driver")
+const { downloadResource, getTimeInFormat } = require("../../functions/utils")
 
 const fields = [
   {

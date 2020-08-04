@@ -37,7 +37,7 @@ export default [
         icon: BarChartRoundedIcon,
         children: [
           {
-            title: "Make PDF's",
+            title: "Generate PDF's",
             href: "/finances/settings",
             icon: FileCopyRoundedIcon,
           },

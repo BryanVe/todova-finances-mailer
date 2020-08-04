@@ -7,7 +7,7 @@ const initialState = {
 }
 
 const syncDatabaseReducer = (state = initialState, action) => {
-  switch (action) {
+  switch (action.type) {
     case CONFIGURATION_DATABASE_SYNC.SUCCESS:
       return {
         ...state,

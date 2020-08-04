@@ -1,6 +1,8 @@
 const express = require("express")
 const bodyParser = require("body-parser")
 const cors = require("cors")
+const path = require("path")
+const fs = require("fs")
 
 const app = express()
 
@@ -8,11 +10,11 @@ const http = require("http")
 const server = http.createServer(app)
 const socketIO = require("socket.io")
 const io = socketIO(server)
-const { spawn } = require("child_process")
-const path = require("path")
 
 const db = require("./database")
 const routes = require("./routes")
+const databaseController = require("./controllers/configuration/database")
+const pdfFilesController = require("./controllers/finances/pdfFiles")
 
 const PORT = 4000 || process.env.PORT
 
@@ -32,29 +34,21 @@ app.get("/", (req, res) => {
 
 // this section will manage the broadcast of the server console to the client
 io.on("connection", (socket) => {
-  app.post("/", (req, res) => {
-    res.end()
-    const execFolder = path.resolve(__dirname, "assets/bash/mongo-sync")
-    const execFile = "mongo-sync.sh"
-    const cmd = `${execFolder}/${execFile}`
+  app.post("/configuration/database/sync", databaseController.sync(socket))
+  app.post(
+    "/finances/generate/pdf-files",
+    async (req, res) => await pdfFilesController.generateFiles(socket, req, res)
+  )
+  app.get(
+    "/finances/get/pdf-files",
+    async (req, res) => await pdfFilesController.getFiles(socket, req, res)
+  )
 
-    const exec = spawn("bash", [cmd, "pull"], { cwd: execFolder })
-
-    // broadcasts bash file execution
-    exec.stdout.on("data", (data) => {
-      socket.broadcast.emit("database-log", data + "")
-    })
-
-    // broadcasts error if it occurs
-    exec.stderr.on("data", (data) => {
-      socket.broadcast.emit("database-log", data + "")
-    })
-
-    // code 0 === success
-    exec.on("close", (code) => {
-      socket.broadcast.emit("database-sync", code === 0)
-    })
-  })
+  // app.get("/pdfs", (req, res) => {
+  //   res.header("Content-Type", "application/pdf")
+  //   res.attachment("aedasdasdad.pdf")
+  //   res.download(path.join(__dirname, "pdfs/prueba1.pdf"))
+  // })
 })
 
 // start the server

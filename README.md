@@ -79,11 +79,11 @@ To create a production build, use yarn build.
 
 ### Server
 
-This project have six endpoints implemented:
+This project have eight endpoints implemented:
 
 1. Home: `/`, this endpoint has a get method, just to know that our server is running.
 
-2. The other five endpoints have the same structure, like this: `/<field>/download`. Where `<field>` can be `customers`, `drivers`, `enterprises`, `shipments` or `driverSchedules`.
+2. Five endpoints have the same structure, like this: `/<field>/download`. Where `<field>` can be `customers`, `drivers`, `enterprises`, `shipments` or `driverSchedules`.
 
    These endpoints have a get method and it serves to download the csv files using query params to modify the date range. The structure of the query is as follows:
 
@@ -151,6 +151,16 @@ This project have six endpoints implemented:
 
      ```
      /<field>/download?period=interval&params=%7B%22startDate%22%3A%222020-05-15T04%3A00%3A00.000Z%22%2C%22endDate%22%3A%222020-06-02T04%3A00%3A00.000Z%22%7D
+     ```
+
+3. The other two endpoints:
+   - One allows us to generate the pdf files, this endpoint has a post method.
+     ```
+     /finances/generate/pdf-files
+     ```
+   - The second one allows us to get all the pdf files generated previously, this endpoint has a get method.
+     ```
+     /finances/get/pdf-files
      ```
 
 ## Notes

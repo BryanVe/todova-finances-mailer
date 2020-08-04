@@ -5,7 +5,7 @@ import { syncDatabaseSuccess } from "actions/configuration"
 
 function* broadcastLogs() {
   try {
-    yield call(Post, "/")
+    yield call(Post, "/configuration/database/sync")
     yield put(syncDatabaseSuccess())
   } catch (error) {
     console.log(error)

@@ -9,6 +9,7 @@ import DashboardLayout from "./layouts/Dashboard"
 import OverviewView from "./pages/Overview"
 import DownloadCSVView from "./pages/CSV"
 import DatabaseConfigView from "./pages/Configuration"
+import GeneratePDFsView from "./pages/Finances"
 // import PresentationView from "./pages/Presentation"
 
 const routes = [
@@ -73,6 +74,11 @@ const routes = [
         path: "/configuration/database",
         exact: true,
         component: DatabaseConfigView,
+      },
+      {
+        path: "/finances/settings",
+        exact: true,
+        component: GeneratePDFsView,
       },
       // {
       //   component: () => <Redirect to='/errors/error-404' />,

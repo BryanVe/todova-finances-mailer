@@ -1,5 +1,5 @@
-const Enterprise = require("../models/Enterprise")
-const { downloadResource, getTimeInFormat } = require("../functions/utils")
+const Enterprise = require("../../models/Enterprise")
+const { downloadResource, getTimeInFormat } = require("../../functions/utils")
 
 const fields = [
   {

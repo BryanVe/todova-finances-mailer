@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.2.0
+
+### Added
+
+- Two new endpoints, one allows us to generate pdf files of drivers, this endpoint has a post method and we need to pass `beginDate`, `endDate` and `payDate` in order to generate the pdf files. The second one allows us to get all the pdf files generated previously, this endpoint just has a get method.
+
+- The generate button in the app already works. We just have to set the `beginDate`, `endDate` and `payDate`.
+
 ## 3.1.0a
 
 ### Hotfix

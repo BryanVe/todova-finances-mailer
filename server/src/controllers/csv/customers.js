@@ -1,5 +1,5 @@
-const Customer = require("../models/Customer")
-const { downloadResource, getTimeInFormat } = require("../functions/utils")
+const Customer = require("../../models/Customer")
+const { downloadResource, getTimeInFormat } = require("../../functions/utils")
 
 const fields = [
   {

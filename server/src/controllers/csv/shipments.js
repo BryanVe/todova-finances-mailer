@@ -1,8 +1,8 @@
 const moment = require("moment")
-const Shipment = require("../models/Shipment")
-const Driver = require("../models/Driver")
-const Customer = require("../models/Customer")
-const { downloadResource, getTimeInFormat } = require("../functions/utils")
+const Shipment = require("../../models/Shipment")
+const Driver = require("../../models/Driver")
+const Customer = require("../../models/Customer")
+const { downloadResource, getTimeInFormat } = require("../../functions/utils")
 
 const fields = [
   {

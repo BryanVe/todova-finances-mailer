@@ -16,9 +16,10 @@ import {
   DateRangeDelimiter,
   DatePicker,
 } from "@material-ui/pickers"
+import GetAppRoundedIcon from "@material-ui/icons/GetAppRounded"
 
-import moment from "moment-timezone"
 import { apiUrl } from "config/development"
+import { getDateFromMoment } from "lib/helpers"
 
 const useStyles = makeStyles(() => ({
   calendar: {
@@ -69,16 +70,6 @@ const dateRangeOptions = [
     value: "interval",
   },
 ]
-
-const getDateFromMoment = (momentObject) => {
-  if (!momentObject) return
-
-  // set Santiago offset
-  return moment
-    .tz(momentObject.toISOString(), "America/Santiago")
-    .startOf("day")
-    .toISOString()
-}
 
 const Options = () => {
   const classes = useStyles()
@@ -274,6 +265,7 @@ const Options = () => {
             <Button
               disabled={validateDownload(currentOptionSelected.value)}
               fullWidth
+              startIcon={<GetAppRoundedIcon />}
               size='large'
               color='primary'
               variant='contained'
