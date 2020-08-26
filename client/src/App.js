@@ -1,34 +1,24 @@
-import React from "react"
-import { BrowserRouter as Router } from "react-router-dom"
-import { Provider as StoreProvider } from "react-redux"
-import { ThemeProvider } from "@material-ui/core"
-import { LocalizationProvider } from "@material-ui/pickers"
-import MomentUtils from "@material-ui/pickers/adapter/moment"
+import React, { useEffect } from "react"
+import { useDispatch } from "react-redux"
 import { renderRoutes } from "react-router-config"
-import WebFont from "webfontloader"
 import "moment/locale/es-do"
 
-import configureStore from "./configureStore"
+import { authenticateUserRequest } from "actions"
+import { SnackbarMessage } from "components"
 import routes from "./routes"
-import theme from "./theme"
-
-const store = configureStore()
-
-WebFont.load({
-  google: {
-    families: ["Quicksand:400,500", "sans-serif"],
-  },
-})
 
 const App = () => {
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    dispatch(authenticateUserRequest())
+  }, [dispatch])
+
   return (
-    <LocalizationProvider dateAdapter={MomentUtils} locale='es-do'>
-      <StoreProvider store={store}>
-        <ThemeProvider theme={theme}>
-          <Router>{renderRoutes(routes)}</Router>
-        </ThemeProvider>
-      </StoreProvider>
-    </LocalizationProvider>
+    <React.Fragment>
+      <SnackbarMessage />
+      {renderRoutes(routes)}
+    </React.Fragment>
   )
 }
 

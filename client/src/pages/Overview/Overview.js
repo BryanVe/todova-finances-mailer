@@ -11,11 +11,9 @@ const useStyles = makeStyles((theme) => ({
 const Overview = () => {
   const classes = useStyles()
 
-  // if (true) return <Redirect to='/auth/login' />
-
   return (
     <div className={classes.root}>
-      <Typography variant='h1'>Welcome!</Typography>
+      <Typography variant='h2'>Welcome!</Typography>
     </div>
   )
 }

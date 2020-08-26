@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react"
+import { useDispatch } from "react-redux"
+
 import {
   makeStyles,
   Card,
@@ -9,26 +11,26 @@ import {
   CardActions,
   Popover,
 } from "@material-ui/core"
-
 import SyncRoundedIcon from "@material-ui/icons/SyncRounded"
-import Snackbar from "@material-ui/core/Snackbar"
-import MuiAlert from "@material-ui/lab/Alert"
-import { useDispatch } from "react-redux"
-import { syncDatabaseRequest } from "actions"
-import { apiUrl } from "config/development"
+
 import io from "socket.io-client"
 import { useForceUpdate } from "react-custom-hook-use-force-update"
+import { syncDatabaseRequest, showMessage } from "actions"
+import { apiUrl } from "config/development"
 
 const useStyles = makeStyles((theme) => ({
   root: {
     margin: "0 auto",
     padding: theme.spacing(3),
   },
+  consoleLogs: {
+    padding: 20,
+    backgroundColor: "#58585F",
+    color: "#EBEBEC",
+    fontFamily: "Quicksand",
+    fontWeight: 500,
+  },
 }))
-
-const Alert = (props) => {
-  return <MuiAlert elevation={6} variant='filled' {...props} />
-}
 
 const DatabaseConfig = () => {
   const dispatch = useDispatch()
@@ -37,48 +39,28 @@ const DatabaseConfig = () => {
   const [anchorEl, setAnchorEl] = useState(null)
   const [isSynchronizing, setIsSynchronizing] = useState(false)
   const [screenLog, setScreenLog] = useState([])
-  const [databaseInfoSnack, setDatabaseInfoSnack] = useState({
-    open: false,
-    message: "Base de datos sincronizada correctamente",
-    severity: "success",
-  })
 
   const openPopper = Boolean(anchorEl)
 
   const onConfirmSynchronize = () => {
     setIsSynchronizing(true)
-    dispatch(syncDatabaseRequest())
+    dispatch(syncDatabaseRequest({ stopSynchronizing }))
     setAnchorEl(null)
   }
 
-  const handleClose = (event, reason) => {
-    if (reason === "clickaway") {
-      return
-    }
-    setDatabaseInfoSnack((prevState) => ({
-      ...prevState,
-      open: false,
-    }))
+  const stopSynchronizing = () => {
+    setIsSynchronizing(false)
   }
 
   useEffect(() => {
     const socket = io(apiUrl)
     socket.on("database-sync", (successState) => {
-      setIsSynchronizing(false)
       if (!successState)
-        setDatabaseInfoSnack((prevState) => ({
-          ...prevState,
-          message: "Base de datos no se pudo sincronizar",
-          severity: "error",
-          open: true,
-        }))
+        dispatch(showMessage("error", "Base de datos no se pudo sincronizar"))
       else
-        setDatabaseInfoSnack((prevState) => ({
-          ...prevState,
-          message: "Base de datos sincronizada correctamente",
-          severity: "success",
-          open: true,
-        }))
+        dispatch(
+          showMessage("success", "Base de datos sincronizada correctamente")
+        )
     })
     socket.on("database-log", (stream) => {
       setScreenLog((previousArray) => {
@@ -88,7 +70,10 @@ const DatabaseConfig = () => {
       })
       forceUpdate()
     })
-  }, [forceUpdate])
+    return () => {
+      socket.disconnect()
+    }
+  }, [forceUpdate, dispatch])
 
   return (
     <div className={classes.root}>
@@ -160,32 +145,13 @@ const DatabaseConfig = () => {
           }
         />
         <CardContent>
-          <div
-            style={{
-              padding: 20,
-              backgroundColor: "#58585F",
-              color: "#EBEBEC",
-              fontFamily: "Quicksand",
-              fontWeight: 500,
-            }}
-          >
+          <div className={classes.consoleLogs}>
             {screenLog.map((line, index) => (
               <div key={index}>{line}</div>
             ))}
           </div>
         </CardContent>
       </Card>
-      <Snackbar
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        open={databaseInfoSnack.open}
-        autoHideDuration={1200}
-        onClose={handleClose}
-        message='I love snacks'
-      >
-        <Alert onClose={handleClose} severity={databaseInfoSnack.severity}>
-          {databaseInfoSnack.message}
-        </Alert>
-      </Snackbar>
     </div>
   )
 }

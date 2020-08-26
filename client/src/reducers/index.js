@@ -1,12 +1,14 @@
 import { combineReducers } from "redux"
-import sessionReducer from "./sessionReducer"
-import syncDatabaseReducer from "./syncDatabaseReducer"
+import configuration from "./configuration"
 import finances from "./finances"
+import auth from "./auth"
+import snackbarMessage from "./snackbarMessage"
 
 const rootReducer = combineReducers({
-  session: sessionReducer,
-  configuration: syncDatabaseReducer,
+  configuration,
   finances,
+  auth,
+  snackbarMessage,
 })
 
 export default rootReducer

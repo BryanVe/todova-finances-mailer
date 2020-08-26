@@ -2,7 +2,7 @@ const { spawn } = require("child_process")
 const path = require("path")
 
 module.exports = {
-  sync: (socket) => (req, res) => {
+  sync: (socket, req, res) => {
     res.end()
     const execFolder = path.resolve(__dirname, "../../assets/bash/mongo-sync")
     const execFile = "mongo-sync.sh"

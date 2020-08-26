@@ -1,38 +1,31 @@
 const fs = require("fs")
 const path = require("path")
-const utils = require("util")
 const puppeteer = require("puppeteer")
 const hb = require("handlebars")
-
-const readFile = utils.promisify(fs.readFile)
 
 const moment = require("moment")
 const mkdirp = require("mkdirp")
 const rimraf = require("rimraf")
+const nodemailer = require("nodemailer")
 const pdfFolder = path.resolve(__dirname, "../../pdfs")
+const getTemplateHtml = require("./template")
 
-const ShipmentRequest = require("../../models/Shipment")
+// models
 const Customer = require("../../models/Customer")
 const Enterprise = require("../../models/Enterprise")
+const Shipment = require("../../models/Shipment")
 const Driver = require("../../models/Driver")
 const DriverSchedule = require("../../models/DriverSchedule")
+const DriverInfo = require("../../models/DriverInfo")
+const DateGenerated = require("../../models/DateGenerated")
+const NotSentFile = require("../../models/NotSentFile")
 
-// -----------------------------------------
-
-const getTemplateHtml = async () => {
-  try {
-    // read the html template file
-    const templateFilePath = path.join(__dirname, "template.html")
-    return await readFile(templateFilePath, "utf8")
-  } catch (error) {
-    return error
-  }
-}
+const { getTimeInFormat } = require("../../functions/utils")
 
 const generatePdf = async (data, fileName) => {
   try {
     // get the html template
-    const htmlTemplate = await getTemplateHtml()
+    const htmlTemplate = await getTemplateHtml(data)
 
     // compile the template
     const template = hb.compile(htmlTemplate, { strict: true })
@@ -53,6 +46,12 @@ const generatePdf = async (data, fileName) => {
     await page.pdf({
       path: path.join(pdfFolder, `${fileName}.pdf`),
       format: "A4",
+      margin: {
+        top: "2.54cm",
+        bottom: "1.9cm",
+        left: "1.9cm",
+        right: "1.9cm",
+      },
     })
 
     await browser.close()
@@ -61,18 +60,82 @@ const generatePdf = async (data, fileName) => {
   }
 }
 
-// -----------------------------------------
+const groupingShipmentsByDriverId = (shipments) => {
+  let driverShipments = {}
+  if (shipments === null) return
+
+  shipments.forEach((shipment) => {
+    if (!driverShipments[shipment.driverId]) {
+      driverShipments[shipment.driverId] = [shipment]
+    } else if (driverShipments[shipment.driverId]) {
+      driverShipments[shipment.driverId].push(shipment)
+    }
+  })
+  delete driverShipments[""]
+  return driverShipments
+}
+
+const sendEmail = async (credentials, emailTo, filename, textOptions) => {
+  try {
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: credentials.user,
+        pass: credentials.password,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    })
+
+    let header =
+      '<div style="font-size:12.8px;color:rgb(76,17,48);width:749.688px;margin-left:41.6406px;font-family:&quot;open sans&quot;,sans-serif;padding-bottom:20px;float:left"><img src="https://s3.sa-east-1.amazonaws.com/todovapersonal/logoMail.png" alt="TodoVa Logo" class="CToWUd a6T" tabindex="0"><br><br><img src="https://s3.sa-east-1.amazonaws.com/todovapersonal/todovadriver.jpg" alt="TodoVa Driver" width="454" height="155" class="CToWUd a6T" tabindex="1"><div class="a6S" dir="ltr" style="opacity: 0.01; left: 407.625px; top: 180px;"><div id=":v2" class="T-I J-J5-Ji aQv T-I-ax7 L3 a5q" role="button" tabindex="0" aria-label="Descargar el archivo adjunto image.png" data-tooltip-class="a1V" data-tooltip="Descargar"><div class="aSK J-J5-Ji aYr"></div></div><div id=":v3" class="T-I J-J5-Ji aQv T-I-ax7 L3 a5q" role="button" tabindex="0" aria-label="Guardar el archivo adjunto image.png en Drive" data-tooltip-class="a1V" data-tooltip="Guardar en Drive"><div class="wtScjd J-J5-Ji aYr aQu"><div class="T-aT4" style="display: none;"><div></div><div class="T-aT4-JX"></div></div></div></div></div><br></div>'
+    let body = `<div style="background-image:initial;background-position:initial;background-size:initial;background-repeat:initial;background-origin:initial;background-clip:initial;width:749.688px;margin-left:41.6406px;padding-left:0px;padding-right:0px;padding-bottom:20px;margin-bottom:20px;float:left"><span style="font-size:12.8px"><font face="trebuchet ms, sans-serif" color="#4c1130"></font></span><p style="color:rgb(76,17,48);font-family:&quot;trebuchet ms&quot;,sans-serif;font-size:18px;width:674.719px;margin-left:37.4844px;float:left"><font face="trebuchet ms, sans-serif">Estimad@:</font></p><span style="font-size:12.8px"><font face="trebuchet ms, sans-serif" color="#4c1130"></font></span><p style="color:rgb(76,17,48);font-family:&quot;trebuchet ms&quot;,sans-serif;font-size:12.8px;width:674.719px;margin-left:37.4844px;float:left;margin-top:0px"><font face="trebuchet ms, sans-serif" color="#666666">Esperamos que te encuentres bien!&nbsp;</font></p><p style="color:rgb(76,17,48);font-family:&quot;trebuchet ms&quot;,sans-serif;font-size:12.8px;width:674.719px;margin-left:37.4844px;float:left;margin-top:0px"><font face="trebuchet ms, sans-serif" color="#666666">Te adjuntamos tu reporte de envíos&nbsp;correspondientes al período del ${getTimeInFormat(
+      textOptions.beginDate,
+      "literal"
+    )} al ${getTimeInFormat(
+      textOptions.endDate,
+      "literal"
+    )}.&nbsp;</font></p><p style="color:rgb(76,17,48);font-family:&quot;trebuchet ms&quot;,sans-serif;font-size:12.8px;width:674.719px;margin-left:37.4844px;float:left;margin-top:0px"><font face="trebuchet ms, sans-serif" color="#666666">Te informamos que se realizarán las transferencias el día ${getTimeInFormat(
+      textOptions.payDate,
+      "literal"
+    )}, entre las 12:00 y 18:00 horas.</font></p><p style="color:rgb(76,17,48);font-family:&quot;trebuchet ms&quot;,sans-serif;font-size:12.8px;width:674.719px;margin-left:37.4844px;float:left;margin-top:0px"><span style="color:rgb(102,102,102)">Si tienes dudas escríbenos, estamos aquí para ayudarte.</span></p><p style="width:674.719px;margin-left:37.4844px;float:left;margin-top:0px"><font face="trebuchet ms, sans-serif" color="#666666"><font color="#4c1130"><span style="font-size:12.8px">Aprovechamos de </span></font><span style="font-size:12.8px">agradecer</span><font color="#4c1130"><span style="font-size:12.8px">&nbsp;que seas parte de TodoVa! Y contarte que seguimos trabajando a toda máquina para que la cantidad de envíos siga aumentando.</span></font></font></p></div>`
+    let footer =
+      '<div style="font-size:12.8px;color:rgb(76,17,48);font-family:&quot;trebuchet ms&quot;,sans-serif;background-image:initial;background-position:initial;background-size:initial;background-repeat:initial;background-origin:initial;background-clip:initial;width:749.688px;margin-left:41.6406px;padding-left:0px;padding-right:0px;padding-bottom:20px;margin-bottom:20px;float:left"><p style="width:674.719px;margin-left:37.4844px;float:left;font-size:14px;margin-top:0px"><strong style="font-size:small"><font color="#4c1130" face="trebuchet ms, sans-serif" size="4">Saludos! Equipo TodoVa!</font></strong></p></div>'
+
+    let options = {
+      from: `"Finanzas TodoVa" <${credentials.user}>`,
+      // TODO -> to: emailTo,
+      to: "gverae@uni.pe",
+      sender: credentials.user,
+      replyTo: credentials.user,
+      subject: "Reporte de Envíos",
+      html: `${header}${body}${footer}`,
+      attachments: [
+        {
+          filename: "adjunto.pdf",
+          path: path.resolve(__dirname, `${pdfFolder}/${filename}`),
+        },
+      ],
+    }
+
+    const result = await transporter.sendMail(options)
+    return result
+  } catch (error) {
+    throw error
+  }
+}
 
 module.exports = {
   generateFiles: async (socket, req, res) => {
     socket.broadcast.emit("pdf-generating", true)
     const beginDate = new Date(req.body.beginDate)
     const endDate = new Date(req.body.endDate)
-    // const payDate = new Date(req.body.payDate)
+    const payDate = new Date(req.body.payDate)
 
     console.log("Generating pdfs")
-    console.log("from: ", moment(beginDate).toISOString())
-    console.log("until: ", moment(endDate).toISOString())
+    console.log("from: ", getTimeInFormat(beginDate, "literal"))
+    console.log("until: ", getTimeInFormat(endDate, "literal"))
 
     const getShipments = async (beginDate, endDate) => {
       try {
@@ -83,7 +146,7 @@ module.exports = {
           "cancelled_by_driver",
           "cancelled_by_todova",
         ]
-        const shipments = await ShipmentRequest.find(
+        const shipments = await Shipment.find(
           {
             "actionHistory.action": { $in: shipmentStates },
             "actionHistory.time": { $gte: beginDate, $lt: endDate },
@@ -110,21 +173,6 @@ module.exports = {
       } catch (error) {
         res.status(500).send("Database error")
       }
-    }
-
-    const groupingShipmentsByDriverId = (shipments) => {
-      let driverShipments = {}
-      if (shipments === null) return
-
-      shipments.forEach((shipment) => {
-        if (!driverShipments[shipment.driverId]) {
-          driverShipments[shipment.driverId] = [shipment]
-        } else if (driverShipments[shipment.driverId]) {
-          driverShipments[shipment.driverId].push(shipment)
-        }
-      })
-      delete driverShipments[""]
-      return driverShipments
     }
 
     const getCustomerInfo = async (customerId, customerType) => {
@@ -230,8 +278,6 @@ module.exports = {
     }
 
     const getRowsDriverSchedule = async (driverId, rows) => {
-      // use socketio
-      // sails.sockets.blast("pdf-generating", true);
       let newRows = []
       let driverSchedules = await getDriverSchedules(driverId)
       for (let schedule of driverSchedules) {
@@ -268,25 +314,15 @@ module.exports = {
       return newRows
     }
 
-    const createPdf = async (
-      driver,
-      rows,
-      beginDate,
-      endDate,
-      fortnight,
-      month
-    ) => {
+    const createPdf = async (driver, rows, beginDate, endDate, payDate) => {
       try {
-        const data = {
-          testId: driver._id,
-          testFirstName: driver.details.firstName,
-          testLastName: driver.details.lastName,
-          testEmail: driver.details.email,
-        }
         const fileName = driver.details.email
-        await generatePdf(data, fileName)
+        await generatePdf(
+          { driver, rows, beginDate, endDate, payDate },
+          fileName
+        )
       } catch (error) {
-        createPdf(driver, rows, beginDate, endDate, fortnight, month)
+        createPdf(driver, rows, beginDate, endDate, payDate)
       }
     }
 
@@ -301,12 +337,13 @@ module.exports = {
     }
 
     const makeDriverPdfFiles = async (driverShipments) => {
-      global.total = 0
+      const totalPayList = {}
       for (let driverId in driverShipments) {
         let driver = await getDriverInfo(driverId)
 
         // if the driver exists in the database
         if (driver) {
+          let currentTotal = 0
           let rows = []
 
           for (let shipment of driverShipments[driverId]) {
@@ -337,18 +374,17 @@ module.exports = {
             })
           })
 
+          rows.forEach((shipment) => {
+            if (shipment) currentTotal += parseFloat(shipment.driverPrice)
+          })
+          totalPayList[driver.details.email] = currentTotal
           // no create empty pdf files
           if (rows.length === 0) continue
-          await createPdf(
-            driver,
-            rows,
-            beginDate,
-            endDate,
-            req.body.fortnight,
-            req.body.month
-          )
+
+          await createPdf(driver, rows, beginDate, endDate, payDate)
         }
       }
+      return totalPayList
     }
 
     // create pdf's folder if it doesn't exist yet
@@ -361,26 +397,138 @@ module.exports = {
 
     await makeDriverPdfFiles(driverShipments)
 
-    console.log("Pdfs have been generated successfully")
+    console.log("Pdfs have been generated successfully\n\n")
 
     const files = await fs
       .readdirSync(pdfFolder)
       .filter((file) => file.indexOf(".pdf") >= 0)
 
+    const data = await Promise.all(
+      files.map(
+        async (file) =>
+          await DriverInfo.findOne({ email: file.split(".pdf")[0] })
+      )
+    )
+
+    await DateGenerated.deleteMany({})
+    await DateGenerated.create({
+      beginDate,
+      endDate,
+      payDate,
+    })
+
     res.json({
-      files,
+      generateDate: {
+        beginDate,
+        endDate,
+        payDate,
+      },
+      data,
     })
 
     socket.broadcast.emit("pdf-generating", false)
   },
 
-  getFiles: async (socket, req, res) => {
+  getFiles: async (req, res) => {
     const files = await fs
       .readdirSync(pdfFolder)
       .filter((file) => file.indexOf(".pdf") >= 0)
 
-    res.json({
-      files,
-    })
+    const generateDate = (await DateGenerated.find({}))[0]
+
+    const data = await Promise.all(
+      files.map(
+        async (file) =>
+          await DriverInfo.findOne({ email: file.split(".pdf")[0] })
+      )
+    )
+
+    res.json({ generateDate, data })
+  },
+
+  getOneFile: (req, res) => {
+    const fileName = `${pdfFolder}/${req.params.file}`
+    res.setHeader("Content-Type", "application/pdf")
+    res.download(fileName)
+  },
+
+  sendFiles: async (req, res) => {
+    const filesToSend = req.body.files
+
+    const notSentFiles = (await NotSentFile.find({})).map((doc) => doc.file)
+
+    let isAllSended = true
+    for (let fileName of filesToSend) {
+      if (notSentFiles.includes(fileName)) continue
+
+      const email = fileName.split(".pdf")[0]
+      const driverInfo = await DriverInfo.findOne({ email })
+
+      if (driverInfo.isEmailSended) continue
+
+      try {
+        let sendAction = await sendEmail(
+          req.body.credentials,
+          email,
+          fileName,
+          req.body.textOptions
+        )
+        if (sendAction.accepted.length > 0)
+          await DriverInfo.findOneAndUpdate(
+            { _id: driverInfo._id },
+            { isEmailSended: true }
+          )
+      } catch (err) {
+        if (err.command && err.command === "AUTH PLAIN")
+          return res.status(500).json({
+            status: "error",
+            message: "La contraseña ingresada es incorrecta",
+            data: {},
+          })
+        isAllSended = false
+        console.log(err)
+      }
+    }
+
+    if (isAllSended) {
+      console.log("Todos los correos fueron enviados exitósamente")
+      res.status(200).json({
+        status: "success",
+        message: "Todos los correos fueron enviados exitósamente",
+        data: {},
+      })
+    } else {
+      console.log("No todos los correos fueron enviados exitósamente")
+      res.status(500).json({
+        status: "error",
+        message: "No todos los correos fueron enviados exitósamente",
+        data: {},
+      })
+    }
+  },
+
+  setNotSentFiles: async (req, res) => {
+    try {
+      const files = req.body.files
+
+      await Promise.all(
+        files.map(async (file) => {
+          if (req.body.operation === "set") await NotSentFile.create({ file })
+          if (req.body.operation === "unset")
+            await NotSentFile.deleteMany({ file })
+        })
+      )
+
+      res.status(200).end()
+    } catch (error) {
+      res.status(500).end()
+    }
+  },
+
+  getNotSentFiles: async (req, res) => {
+    const notSentFiles = await NotSentFile.find({})
+    const files = notSentFiles.map((doc) => doc.file)
+
+    res.json(files)
   },
 }

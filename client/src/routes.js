@@ -5,12 +5,15 @@ import { Redirect } from "react-router-dom"
 
 import AuthLayout from "./layouts/Auth"
 import DashboardLayout from "./layouts/Dashboard"
-// import DashboardDefaultView from "./pages/DashboardDefault"
+import ErrorLayout from "./layouts/Error"
 import OverviewView from "./pages/Overview"
 import DownloadCSVView from "./pages/CSV"
 import DatabaseConfigView from "./pages/Configuration"
-import GeneratePDFsView from "./pages/Finances"
-// import PresentationView from "./pages/Presentation"
+import DriverFilesView from "./pages/Finances"
+import NotSentFilesView from "./pages/NotSentFiles"
+import PrivateRoute from "components/PrivateRoute"
+
+const protectRoute = (component) => () => <PrivateRoute component={component} />
 
 const routes = [
   {
@@ -27,35 +30,40 @@ const routes = [
         exact: true,
         component: lazy(() => import("pages/Login")),
       },
-      // {
-      //   component: () => <Redirect to='/errors/error-404' />,
-      // },
+      {
+        path: "/auth/register",
+        exact: true,
+        component: lazy(() => import("pages/Register")),
+      },
+      {
+        component: () => <Redirect to='/errors/404' />,
+      },
     ],
   },
-  // {
-  //   path: "/errors",
-  //   component: ErrorLayout,
-  //   routes: [
-  //     {
-  //       path: "/errors/error-401",
-  //       exact: true,
-  //       component: lazy(() => import("pages/Error401")),
-  //     },
-  //     {
-  //       path: "/errors/error-404",
-  //       exact: true,
-  //       component: lazy(() => import("pages/Error404")),
-  //     },
-  //     {
-  //       path: "/errors/error-500",
-  //       exact: true,
-  //       component: lazy(() => import("pages/Error500")),
-  //     },
-  //     {
-  //       component: () => <Redirect to='/errors/error-404' />,
-  //     },
-  //   ],
-  // },
+  {
+    path: "/errors",
+    component: ErrorLayout,
+    routes: [
+      {
+        path: "/errors/401",
+        exact: true,
+        component: lazy(() => import("pages/Error401")),
+      },
+      {
+        path: "/errors/404",
+        exact: true,
+        component: lazy(() => import("pages/Error404")),
+      },
+      {
+        path: "/errors/500",
+        exact: true,
+        component: lazy(() => import("pages/Error500")),
+      },
+      {
+        component: () => <Redirect to='/errors/404' />,
+      },
+    ],
+  },
   {
     route: "*",
     component: DashboardLayout,
@@ -63,26 +71,31 @@ const routes = [
       {
         path: "/overview",
         exact: true,
-        component: OverviewView,
+        render: protectRoute(OverviewView),
       },
       {
         path: "/csv/download",
         exact: true,
-        component: DownloadCSVView,
+        render: protectRoute(DownloadCSVView),
       },
       {
         path: "/configuration/database",
         exact: true,
-        component: DatabaseConfigView,
+        render: protectRoute(DatabaseConfigView),
       },
       {
-        path: "/finances/settings",
+        path: "/finances/pdf-files",
         exact: true,
-        component: GeneratePDFsView,
+        render: protectRoute(DriverFilesView),
       },
-      // {
-      //   component: () => <Redirect to='/errors/error-404' />,
-      // },
+      {
+        path: "/finances/not-sent",
+        exact: true,
+        render: protectRoute(NotSentFilesView),
+      },
+      {
+        component: () => <Redirect to='/errors/404' />,
+      },
     ],
   },
 ]

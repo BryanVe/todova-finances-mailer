@@ -23,6 +23,7 @@ Create an `.env` file inside server folder. It looks like:
 ```bash
 PORT=XXXX
 MONGO=<URI>
+ACCESS_TOKEN_SECRET=<secret>
 ```
 
 Open a terminal and run the following commands:
@@ -52,6 +53,7 @@ Create an `.env` file inside client folder. It looks like:
 
 ```bash
 REACT_APP_APIURL=http://192.168.1.X:<SERVER_PORT>
+REACT_APP_DEFAULT_EMAIL=<email>
 ```
 
 Open a terminal and run the following commands:
@@ -79,7 +81,7 @@ To create a production build, use yarn build.
 
 ### Server
 
-This project have eight endpoints implemented:
+This project have fifteen endpoints implemented:
 
 1. Home: `/`, this endpoint has a get method, just to know that our server is running.
 
@@ -153,15 +155,94 @@ This project have eight endpoints implemented:
      /<field>/download?period=interval&params=%7B%22startDate%22%3A%222020-05-15T04%3A00%3A00.000Z%22%2C%22endDate%22%3A%222020-06-02T04%3A00%3A00.000Z%22%7D
      ```
 
-3. The other two endpoints:
-   - One allows us to generate the pdf files, this endpoint has a post method.
+3. The other nine endpoints:
+   - To generate the pdf files, this endpoint has a post method.
      ```
-     /finances/generate/pdf-files
+     /finances/pdf-files/generate
      ```
-   - The second one allows us to get all the pdf files generated previously, this endpoint has a get method.
+     The POST method accepts as a parameters:
+     ```json
+     {
+       "beginDate": "2020-04-12T12:32:00.000Z",
+       "endDate": "2020-05-13T12:32:00.000Z",
+       "payDate": "2020-05-17T12:32:00.000Z"
+     }
      ```
-     /finances/get/pdf-files
+   - To get all the pdf files generated previously, this endpoint has a get method.
      ```
+     /finances/pdf-files
+     ```
+   - To get one file as a report, this endpoint has a get method:
+     ```
+     /finances/pdf-files/:file
+     ```
+     Example:
+     ```
+     /finances/pdf-files/random_email@test.com
+     ```
+   - To send one file or a list of files, this endpoint has a post method:
+     ```
+     /finances/pdf-files/send
+     ```
+     The POST method accepts as a parameters:
+     ```json
+     {
+       "files": [
+         "email1@test.com.pdf",
+         "email2@test.com.pdf",
+         "email3@test.com.pdf",
+         "email4@test.com.pdf",
+         "email5@test.com.pdf"
+       ]
+     }
+     ```
+   - To set and get not sent files in order to send them later, this endpoint has a get (get files) and post (set files) method:
+     ```
+     /finances/not-sent-files
+     ```
+     The POST method accepts as a parameters:
+     ```json
+     {
+       "files": [
+         "email1@test.com.pdf",
+         "email2@test.com.pdf",
+         "email3@test.com.pdf"
+       ]
+     }
+     ```
+   - To get a excel report of the drivers payments, this endpoint has a get method:
+     ```
+     /finances/excel-driver-payment
+     ```
+   - To register in the app, this endpoint has a post method:
+     ```
+     /auth/register
+     ```
+     The POST method accepts as a parameters:
+     ```json
+     {
+       "email": "email@test.com",
+       "password": "pass",
+       "firstName": "Foo",
+       "lastName": "Bar"
+     }
+     ```
+   - To login in the app, this endpoint has a post method:
+     ```
+     /auth/login
+     ```
+     The POST method accepts as a parameters:
+     ```json
+     {
+       "email": "email@test.com",
+       "password": "pass"
+     }
+     ```
+   - To authenticate a user in the app, this endpoint has a get method:
+     ```
+     /auth/whoami
+     ```
+     This endpoint accepts a `accessToken` as a `authorization` header which has been generated when you registered or logged in.
 
 ## Notes
 

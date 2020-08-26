@@ -1,6 +1,5 @@
 import React, { Suspense, useState } from "react"
 import { renderRoutes } from "react-router-config"
-import PropTypes from "prop-types"
 import { makeStyles } from "@material-ui/styles"
 import { LinearProgress } from "@material-ui/core"
 
@@ -37,7 +36,6 @@ const useStyles = makeStyles(() => ({
 
 const Dashboard = (props) => {
   const { route } = props
-
   const classes = useStyles()
   const [openNavBarMobile, setOpenNavBarMobile] = useState(false)
 
@@ -69,10 +67,6 @@ const Dashboard = (props) => {
       </div>
     </div>
   )
-}
-
-Dashboard.propTypes = {
-  route: PropTypes.object,
 }
 
 export default Dashboard

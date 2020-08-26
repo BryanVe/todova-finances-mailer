@@ -2,13 +2,12 @@
 import React, { useState, useEffect } from "react"
 import validate from "validate.js"
 import clsx from "clsx"
-import PropTypes from "prop-types"
 import { makeStyles } from "@material-ui/styles"
 import { Button, TextField } from "@material-ui/core"
 
-// import useRouter from "utils/useRouter"
 import { useHistory } from "react-router-dom"
-// import { login } from 'actions';
+import { loginUserRequest } from "actions"
+import { useDispatch } from "react-redux"
 
 const schema = {
   email: {
@@ -39,10 +38,9 @@ const useStyles = makeStyles((theme) => ({
 
 const LoginForm = (props) => {
   const { className, ...rest } = props
-
+  const dispatch = useDispatch()
   const classes = useStyles()
   const history = useHistory()
-
   const [formState, setFormState] = useState({
     isValid: false,
     values: {},
@@ -52,7 +50,6 @@ const LoginForm = (props) => {
 
   useEffect(() => {
     const errors = validate(formState.values, schema)
-    console.log(formState.values)
     setFormState((formState) => ({
       ...formState,
       isValid: errors ? false : true,
@@ -81,8 +78,7 @@ const LoginForm = (props) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    // dispatch(login());
-    history.push("/overview")
+    dispatch(loginUserRequest(formState.values, history))
   }
 
   const hasError = (field) =>
@@ -96,10 +92,11 @@ const LoginForm = (props) => {
     >
       <div className={classes.fields}>
         <TextField
+          autoFocus
           error={hasError("email")}
           fullWidth
           helperText={hasError("email") ? formState.errors.email[0] : null}
-          label='Email address'
+          label='Email'
           name='email'
           onChange={handleChange}
           value={formState.values.email || ""}
@@ -111,7 +108,7 @@ const LoginForm = (props) => {
           helperText={
             hasError("password") ? formState.errors.password[0] : null
           }
-          label='Password'
+          label='Contraseña'
           name='password'
           onChange={handleChange}
           type='password'
@@ -127,14 +124,10 @@ const LoginForm = (props) => {
         type='submit'
         variant='contained'
       >
-        Sign in
+        Ingresar
       </Button>
     </form>
   )
-}
-
-LoginForm.propTypes = {
-  className: PropTypes.string,
 }
 
 export default LoginForm

@@ -19,7 +19,7 @@ import {
 import GetAppRoundedIcon from "@material-ui/icons/GetAppRounded"
 
 import { apiUrl } from "config/development"
-import { getDateFromMoment } from "lib/helpers"
+import { getDateFromMomentObject } from "lib/helpers"
 
 const useStyles = makeStyles(() => ({
   calendar: {
@@ -115,7 +115,7 @@ const Options = () => {
               onChange={(date) => {
                 setMomentInstance([date, null])
                 setDateParams({
-                  date: getDateFromMoment(date),
+                  date: getDateFromMomentObject(date),
                 })
               }}
               renderInput={(props) => (
@@ -144,8 +144,8 @@ const Options = () => {
               onChange={(date) => {
                 setMomentInstance(date)
                 setDateParams({
-                  startDate: getDateFromMoment(date[0]),
-                  endDate: getDateFromMoment(date[1]),
+                  startDate: getDateFromMomentObject(date[0]),
+                  endDate: getDateFromMomentObject(date[1]),
                 })
               }}
               renderInput={(startProps, endProps) => (
@@ -207,7 +207,7 @@ const Options = () => {
   const downloadResource = () => {
     const params = encodeURIComponent(JSON.stringify(dateParams))
     window.open(
-      `${apiUrl}/${currentOptionSelected.value}/download?period=${dateRange}&params=${params}`
+      `${apiUrl}/csv/${currentOptionSelected.value}/download?period=${dateRange}&params=${params}`
     )
   }
 

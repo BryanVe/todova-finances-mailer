@@ -1,18 +1,15 @@
-/* eslint-disable react/no-multi-comp */
-/* eslint-disable react/display-name */
 import BarChartRoundedIcon from "@material-ui/icons/BarChartRounded"
 import FileCopyRoundedIcon from "@material-ui/icons/FileCopyRounded"
-import ContactMailRoundedIcon from "@material-ui/icons/ContactMailRounded"
 import DashboardRoundedIcon from "@material-ui/icons/DashboardRounded"
-import PersonAddDisabledRoundedIcon from "@material-ui/icons/PersonAddDisabledRounded"
 import ListAltRoundedIcon from "@material-ui/icons/ListAltRounded"
 import GetAppRoundedIcon from "@material-ui/icons/GetAppRounded"
 import SettingsRoundedIcon from "@material-ui/icons/SettingsRounded"
 import StorageRoundedIcon from "@material-ui/icons/StorageRounded"
+import ErrorOutlineIcon from "@material-ui/icons/ErrorOutline"
 
 export default [
   {
-    title: "Finances",
+    title: "",
     pages: [
       {
         title: "Overview",
@@ -37,19 +34,14 @@ export default [
         icon: BarChartRoundedIcon,
         children: [
           {
-            title: "Generate PDF's",
-            href: "/finances/settings",
+            title: "Driver files",
+            href: "/finances/pdf-files",
             icon: FileCopyRoundedIcon,
           },
           {
-            title: "Driver Files",
-            href: "/finances/pdf-files",
-            icon: ContactMailRoundedIcon,
-          },
-          {
-            title: "Restricted",
-            href: "/finances/restricted-drivers",
-            icon: PersonAddDisabledRoundedIcon,
+            title: "Not sent files",
+            href: "/finances/not-sent",
+            icon: ErrorOutlineIcon,
           },
         ],
       },

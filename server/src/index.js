@@ -2,8 +2,6 @@ const express = require("express")
 const bodyParser = require("body-parser")
 const cors = require("cors")
 const path = require("path")
-const fs = require("fs")
-
 const app = express()
 
 const http = require("http")
@@ -18,38 +16,38 @@ const pdfFilesController = require("./controllers/finances/pdfFiles")
 
 const PORT = 4000 || process.env.PORT
 
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(cors())
 app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+  })
+)
 
 db.on("error", console.error.bind(console, "MongoDB connection error:"))
 
 // routes represent all our http routes
 app.use(routes)
 
+app.use("/images", express.static(path.join(__dirname, "assets/images")))
+
 // endpoint just to know that server is running
 app.get("/", (req, res) => {
-  res.json({ status: "express is running" })
+  res.json({ status: "success", message: "express is running" })
 })
 
-// this section will manage the broadcast of the server console to the client
 io.on("connection", (socket) => {
-  app.post("/configuration/database/sync", databaseController.sync(socket))
+  app.post("/configuration/database/sync", (req, res) =>
+    databaseController.sync(socket, req, res)
+  )
   app.post(
-    "/finances/generate/pdf-files",
+    "/finances/pdf-files/generate",
     async (req, res) => await pdfFilesController.generateFiles(socket, req, res)
   )
-  app.get(
-    "/finances/get/pdf-files",
-    async (req, res) => await pdfFilesController.getFiles(socket, req, res)
-  )
-
-  // app.get("/pdfs", (req, res) => {
-  //   res.header("Content-Type", "application/pdf")
-  //   res.attachment("aedasdasdad.pdf")
-  //   res.download(path.join(__dirname, "pdfs/prueba1.pdf"))
-  // })
 })
 
 // start the server
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})

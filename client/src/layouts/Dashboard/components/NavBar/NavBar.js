@@ -1,19 +1,25 @@
 import React, { Fragment, useEffect } from "react"
-import { Link as RouterLink, useLocation } from "react-router-dom"
+import { useLocation, useHistory } from "react-router-dom"
+import { useSelector, useDispatch } from "react-redux"
+import {
+  makeStyles,
+  Drawer,
+  Divider,
+  Paper,
+  Avatar,
+  Typography,
+  Button,
+  Hidden,
+} from "@material-ui/core"
 import clsx from "clsx"
-import PropTypes from "prop-types"
-import { useSelector } from "react-redux"
-import { makeStyles } from "@material-ui/styles"
-import { Drawer, Divider, Paper, Avatar, Typography } from "@material-ui/core"
-import { Hidden } from "@material-ui/core"
 
-// import useRouter from "utils/useRouter"
-import { Navigation } from "components"
 import navigationConfig from "./navigationConfig"
+import { logoutUser } from "actions"
+import { Navigation } from "components"
+import { deleteToken } from "lib/helpers"
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    height: "100%",
     overflowY: "auto",
   },
   content: {
@@ -42,35 +48,46 @@ const useStyles = makeStyles((theme) => ({
 
 const NavBar = (props) => {
   const { openMobile, onMobileClose, className, ...rest } = props
-
+  const dispatch = useDispatch()
+  const history = useHistory()
   const classes = useStyles()
   const location = useLocation()
-  // const router = useRouter()
-  const session = useSelector((state) => state.session)
+  const { email, firstName, lastName } = useSelector(
+    (state) => state.auth.session
+  )
+
+  const handleLogout = () => {
+    dispatch(logoutUser())
+    deleteToken()
+    history.push("/")
+  }
 
   useEffect(() => {
     if (openMobile) {
       onMobileClose && onMobileClose()
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname])
 
   const navbarContent = (
     <div className={classes.content}>
       <div className={classes.profile}>
-        <Avatar
-          alt='Person'
-          className={classes.avatar}
-          component={RouterLink}
-          src={session.user.avatar}
-          to='/profile/1/timeline'
-        />
+        <Avatar alt='Person' className={classes.avatar} />
         <Typography className={classes.name} variant='h4'>
-          {session.user.first_name} {session.user.last_name}
+          {firstName} {lastName}
         </Typography>
-        <Typography variant='body2'>{session.user.bio}</Typography>
+        <Typography variant='body2'>{email}</Typography>
       </div>
+      <Button
+        size='small'
+        style={{ marginTop: 10 }}
+        fullWidth
+        variant='outlined'
+        color='primary'
+        onClick={handleLogout}
+      >
+        Salir
+      </Button>
       <Divider className={classes.divider} />
       <nav className={classes.navigation}>
         {navigationConfig.map((list) => (
@@ -111,12 +128,6 @@ const NavBar = (props) => {
       </Hidden>
     </Fragment>
   )
-}
-
-NavBar.propTypes = {
-  className: PropTypes.string,
-  onMobileClose: PropTypes.func,
-  openMobile: PropTypes.bool,
 }
 
 export default NavBar
