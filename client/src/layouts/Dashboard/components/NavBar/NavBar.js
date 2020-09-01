@@ -1,5 +1,6 @@
 import React, { Fragment, useEffect } from "react"
 import { useLocation, useHistory } from "react-router-dom"
+import PropTypes from "prop-types"
 import { useSelector, useDispatch } from "react-redux"
 import {
   makeStyles,
@@ -46,8 +47,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-const NavBar = (props) => {
-  const { openMobile, onMobileClose, className, ...rest } = props
+const NavBar = ({ openMobile, onMobileClose, className, ...rest }) => {
   const dispatch = useDispatch()
   const history = useHistory()
   const classes = useStyles()
@@ -128,6 +128,12 @@ const NavBar = (props) => {
       </Hidden>
     </Fragment>
   )
+}
+
+NavBar.propTypes = {
+  openMobile: PropTypes.bool,
+  onMobileClose: PropTypes.func,
+  className: PropTypes.string,
 }
 
 export default NavBar

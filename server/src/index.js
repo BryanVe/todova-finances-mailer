@@ -38,14 +38,14 @@ app.get("/", (req, res) => {
 })
 
 io.on("connection", (socket) => {
-  app.post("/configuration/database/sync", (req, res) =>
-    databaseController.sync(socket, req, res)
-  )
   app.post(
     "/finances/pdf-files/generate",
     async (req, res) => await pdfFilesController.generateFiles(socket, req, res)
   )
 })
+app.post("/configuration/database/sync", (req, res) =>
+  databaseController.sync(io, req, res)
+)
 
 // start the server
 server.listen(PORT, () => {

@@ -16,6 +16,12 @@ Clone this repo to your local machine using `https://github.com/BryanVe/todova-f
 
 In order to use this project you have to follow the next steps.
 
+Open a terminal and run
+
+```
+mongod
+```
+
 ### Server
 
 Create an `.env` file inside server folder. It looks like:

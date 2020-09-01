@@ -3,11 +3,10 @@ import { CONFIGURATION_DATABASE_SYNC } from "constants/index"
 import { Post } from "lib/request"
 import { syncDatabaseSuccess, syncDatabaseError } from "actions"
 
-function* broadcastLogs({ payload: { stopSynchronizing } }) {
+function* broadcastLogs() {
   try {
     yield call(Post, "/configuration/database/sync")
     yield put(syncDatabaseSuccess())
-    stopSynchronizing()
   } catch (error) {
     yield put(syncDatabaseError(error.message))
   }

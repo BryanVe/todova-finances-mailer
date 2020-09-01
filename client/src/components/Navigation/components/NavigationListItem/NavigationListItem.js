@@ -1,6 +1,7 @@
 /* eslint-disable react/display-name */
 import React, { useState, forwardRef } from "react"
 import { NavLink as RouterLink } from "react-router-dom"
+import PropTypes from "prop-types"
 import {
   makeStyles,
   ListItem,
@@ -149,6 +150,22 @@ const NavigationListItem = (props) => {
       </ListItem>
     )
   }
+}
+
+NavigationListItem.propTypes = {
+  children: PropTypes.node,
+  className: PropTypes.string,
+  depth: PropTypes.number.isRequired,
+  href: PropTypes.string,
+  icon: PropTypes.any,
+  label: PropTypes.any,
+  open: PropTypes.bool,
+  title: PropTypes.string.isRequired,
+}
+
+NavigationListItem.defaultProps = {
+  depth: 0,
+  open: false,
 }
 
 export default NavigationListItem

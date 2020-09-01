@@ -76,7 +76,7 @@ const LoginForm = (props) => {
     }))
   }
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault()
     dispatch(loginUserRequest(formState.values, history))
   }

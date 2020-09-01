@@ -26,6 +26,15 @@ const NotSentFiles = () => {
     email: fileName.split(".pdf")[0],
   }))
 
+  const handleUnsetPdfFiles = (files) => {
+    dispatch(
+      setNotSentPdfFilesRequest({
+        files,
+        operation: "unset",
+      })
+    )
+  }
+
   useEffect(() => {
     dispatch(getNotSentPdfFilesRequest())
   }, [dispatch])
@@ -42,12 +51,7 @@ const NotSentFiles = () => {
           <Tooltip title='Remover de la lista de no enviados'>
             <IconButton
               onClick={() => {
-                dispatch(
-                  setNotSentPdfFilesRequest({
-                    files: [`${rowData.email}.pdf`],
-                    operation: "unset",
-                  })
-                )
+                handleUnsetPdfFiles([`${rowData.email}.pdf`])
               }}
             >
               <DeleteRoundedIcon color='primary' />
@@ -69,12 +73,7 @@ const NotSentFiles = () => {
             icon: () => <DeleteRoundedIcon color='primary' />,
             tooltip: "Remover de la lista de no enviados",
             onClick: (event, data) => {
-              dispatch(
-                setNotSentPdfFilesRequest({
-                  files: data.map((element) => `${element.email}.pdf`),
-                  operation: "unset",
-                })
-              )
+              handleUnsetPdfFiles(data.map((element) => `${element.email}.pdf`))
             },
           },
         ]}

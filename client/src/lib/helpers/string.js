@@ -1,21 +1,3 @@
-import moment from "moment-timezone"
-
-const OFFSET = "America/Santiago"
-const ACCESS_TOKEN = "accessToken"
-
-export const getDateFromMomentObject = (momentObject) => {
-  if (!momentObject) return
-
-  return moment
-    .tz(momentObject.toISOString(), OFFSET)
-    .startOf("day")
-    .toISOString()
-}
-
-export const formatDate = (date) => {
-  return moment.tz(date, OFFSET).format("DD/MM/YYYY")
-}
-
 export const getEmailFromFileName = (fileName) => {
   return fileName.split(".pdf")[0]
 }
@@ -38,10 +20,3 @@ export const formatFloatStr = (float) => {
     (floatChunk[1] !== "0" ? "," + floatChunk[1] : "")
   )
 }
-
-// accessToken in localStorage
-export const setToken = (token) => localStorage.setItem(ACCESS_TOKEN, token)
-
-export const getToken = () => localStorage.getItem(ACCESS_TOKEN)
-
-export const deleteToken = () => localStorage.removeItem(ACCESS_TOKEN)

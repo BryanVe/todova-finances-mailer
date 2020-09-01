@@ -19,8 +19,11 @@ import PictureAsPdfRoundedIcon from "@material-ui/icons/PictureAsPdfRounded"
 import AccountBalanceRoundedIcon from "@material-ui/icons/AccountBalanceRounded"
 
 import TableGenerated from "pages/Finances/components/TableGenerated"
-import { generatePdfFilesRequest, getPdfFilesRequest } from "actions"
-import { getNotSentPdfFilesRequest } from "actions/finances"
+import {
+  generatePdfFilesRequest,
+  getPdfFilesRequest,
+  getNotSentPdfFilesRequest,
+} from "actions"
 import { getDateFromMomentObject } from "lib/helpers"
 import { apiUrl } from "config/development"
 
@@ -81,10 +84,17 @@ const GeneratePDFs = () => {
     window.open(`${apiUrl}/finances/excel-driver-payment`)
   }
 
+  const handleDateRangeSelector = (date) => {
+    setPeriodTime(date)
+  }
+
+  const handlePayDateSelector = (date) => {
+    setPayDate(date)
+  }
+
   useEffect(() => {
     const socket = io(apiUrl)
     socket.on("pdf-generating", (status) => {
-      console.log(status)
       setLoading(status)
     })
     return () => {
@@ -107,9 +117,7 @@ const GeneratePDFs = () => {
                 startText='Inicio del período'
                 endText='Fin del período'
                 value={periodTime}
-                onChange={(date) => {
-                  setPeriodTime(date)
-                }}
+                onChange={handleDateRangeSelector}
                 renderInput={(startProps, endProps) => (
                   <>
                     <TextField fullWidth {...startProps} helperText='' />
@@ -126,9 +134,7 @@ const GeneratePDFs = () => {
                 label='Fecha de pago'
                 showToolbar={false}
                 value={payDate}
-                onChange={(date) => {
-                  setPayDate(date)
-                }}
+                onChange={handlePayDateSelector}
                 renderInput={(props) => (
                   <TextField
                     fullWidth

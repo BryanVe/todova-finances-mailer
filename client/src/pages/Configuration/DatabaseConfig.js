@@ -13,10 +13,10 @@ import {
 } from "@material-ui/core"
 import SyncRoundedIcon from "@material-ui/icons/SyncRounded"
 
-import io from "socket.io-client"
 import { useForceUpdate } from "react-custom-hook-use-force-update"
 import { syncDatabaseRequest, showMessage } from "actions"
 import { apiUrl } from "config/development"
+import io from "socket.io-client"
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -25,10 +25,11 @@ const useStyles = makeStyles((theme) => ({
   },
   consoleLogs: {
     padding: 20,
+    fontSize: 18,
     backgroundColor: "#58585F",
     color: "#EBEBEC",
-    fontFamily: "Quicksand",
-    fontWeight: 500,
+    // fontFamily: "Quicksand",
+    // fontWeight: 500,
   },
 }))
 
@@ -44,31 +45,34 @@ const DatabaseConfig = () => {
 
   const onConfirmSynchronize = () => {
     setIsSynchronizing(true)
-    dispatch(syncDatabaseRequest({ stopSynchronizing }))
+    dispatch(syncDatabaseRequest())
     setAnchorEl(null)
   }
 
-  const stopSynchronizing = () => {
-    setIsSynchronizing(false)
-  }
+  const openConfirmationPopover = (e) => setAnchorEl(e.currentTarget)
+  const closeConfirmationPopover = () => setAnchorEl(null)
 
   useEffect(() => {
     const socket = io(apiUrl)
-    socket.on("database-sync", (successState) => {
-      if (!successState)
-        dispatch(showMessage("error", "Base de datos no se pudo sincronizar"))
-      else
-        dispatch(
-          showMessage("success", "Base de datos sincronizada correctamente")
-        )
-    })
-    socket.on("database-log", (stream) => {
-      setScreenLog((previousArray) => {
-        let currentArray = previousArray
-        currentArray.push(stream)
-        return currentArray.slice(-25)
+    socket.on("connect", () => {
+      socket.on("database-sync", (successState) => {
+        setIsSynchronizing(false)
+        if (!successState)
+          dispatch(showMessage("error", "Base de datos no se pudo sincronizar"))
+        else
+          dispatch(
+            showMessage("success", "Base de datos sincronizada correctamente")
+          )
       })
-      forceUpdate()
+      socket.on("database-log", (stream) => {
+        setIsSynchronizing(true)
+        setScreenLog((previousArray) => {
+          let currentArray = previousArray
+          currentArray.push(stream)
+          return currentArray.slice(-25)
+        })
+        forceUpdate()
+      })
     })
     return () => {
       socket.disconnect()
@@ -90,7 +94,7 @@ const DatabaseConfig = () => {
               <React.Fragment>
                 <Button
                   disabled={isSynchronizing}
-                  onClick={(e) => setAnchorEl(e.currentTarget)}
+                  onClick={openConfirmationPopover}
                   fullWidth
                   size='large'
                   variant='contained'
@@ -100,7 +104,7 @@ const DatabaseConfig = () => {
                   Sincronizar
                 </Button>
                 <Popover
-                  onClose={() => setAnchorEl(null)}
+                  onClose={closeConfirmationPopover}
                   style={{ marginTop: 10 }}
                   open={openPopper}
                   anchorEl={anchorEl}
@@ -124,7 +128,7 @@ const DatabaseConfig = () => {
                         fullWidth
                         size='small'
                         variant='contained'
-                        onClick={() => setAnchorEl(null)}
+                        onClick={closeConfirmationPopover}
                       >
                         No
                       </Button>
@@ -145,11 +149,13 @@ const DatabaseConfig = () => {
           }
         />
         <CardContent>
-          <div className={classes.consoleLogs}>
-            {screenLog.map((line, index) => (
-              <div key={index}>{line}</div>
-            ))}
-          </div>
+          <pre className={classes.consoleLogs}>
+            <code>
+              {screenLog.map((line, index) => (
+                <span key={index}>{line}</span>
+              ))}
+            </code>
+          </pre>
         </CardContent>
       </Card>
     </div>

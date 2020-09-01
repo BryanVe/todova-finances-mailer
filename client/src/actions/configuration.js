@@ -1,8 +1,7 @@
 import { CONFIGURATION_DATABASE_SYNC } from "constants/index"
 
-export const syncDatabaseRequest = (params) => ({
+export const syncDatabaseRequest = () => ({
   type: CONFIGURATION_DATABASE_SYNC.REQUEST,
-  payload: params,
 })
 
 export const syncDatabaseSuccess = () => ({

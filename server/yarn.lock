@@ -1178,6 +1178,11 @@ make-dir@^3.0.0:
   dependencies:
     semver "^6.0.0"
 
+mandrill-api@^1.0.45:
+  version "1.0.45"
+  resolved "https://registry.yarnpkg.com/mandrill-api/-/mandrill-api-1.0.45.tgz#163939cf486bd18277b0f3baf412c3e65d84a72d"
+  integrity sha1-Fjk5z0hr0YJ3sPO69BLD5l2Epy0=
+
 media-typer@0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/media-typer/-/media-typer-0.3.0.tgz#8710d7af0aa626f8fffa1ce00168545263255748"

@@ -101,20 +101,12 @@ const TableGenerated = ({ loading }) => {
           ? "Remover de la lista de no enviados"
           : "Añadir a la lista de no enviados",
         onClick: () => {
-          if (rowData.rememberFlag)
-            dispatch(
-              setNotSentPdfFilesRequest({
-                files: [`${rowData.email}.pdf`],
-                operation: "unset",
-              })
-            )
-          else
-            dispatch(
-              setNotSentPdfFilesRequest({
-                files: [`${rowData.email}.pdf`],
-                operation: "set",
-              })
-            )
+          dispatch(
+            setNotSentPdfFilesRequest({
+              files: [`${rowData.email}.pdf`],
+              operation: rowData.rememberFlag ? "unset" : "set",
+            })
+          )
         },
         icon: rowData.rememberFlag ? (
           <NotificationsActiveIcon color='secondary' />
@@ -173,10 +165,10 @@ const TableGenerated = ({ loading }) => {
     </Typography>
   )
 
-  const sendFiles = (emails) => {
+  const sendFiles = () => {
     if (passwordField.length === 0) return
 
-    const files = emails.map((email) => getFileNameFromEmail(email))
+    const files = selectedRows.map((email) => getFileNameFromEmail(email))
     const options = {
       files,
       credentials: {
@@ -188,6 +180,7 @@ const TableGenerated = ({ loading }) => {
     dispatch(sendPdfFilesRequest(options, stopSendingEmail))
     setIsSendingEmail(true)
     setPasswordField("")
+    handleCloseSendDialog()
   }
 
   const stopSendingEmail = () => {
@@ -207,6 +200,10 @@ const TableGenerated = ({ loading }) => {
   const handleCloseConfirmSendEmailDialog = () => {
     setOpenConfirmSendEmailDialog(false)
   }
+
+  const handlePasswordField = (event) => setPasswordField(event.target.value)
+
+  const handleCloseSendDialog = () => setOpenConfirmSendEmailDialog(false)
 
   return (
     files.length !== 0 && (
@@ -268,23 +265,14 @@ const TableGenerated = ({ loading }) => {
               label='Contraseña'
               type='password'
               fullWidth
-              onChange={(event) => setPasswordField(event.target.value)}
+              onChange={handlePasswordField}
             />
           </DialogContent>
           <DialogActions>
-            <Button
-              onClick={() => setOpenConfirmSendEmailDialog(false)}
-              color='primary'
-            >
+            <Button onClick={handleCloseSendDialog} color='primary'>
               Cancelar
             </Button>
-            <Button
-              onClick={() => {
-                sendFiles(selectedRows)
-                setOpenConfirmSendEmailDialog(false)
-              }}
-              color='primary'
-            >
+            <Button onClick={sendFiles} color='primary'>
               Enviar
             </Button>
           </DialogActions>

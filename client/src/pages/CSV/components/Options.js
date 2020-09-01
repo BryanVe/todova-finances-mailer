@@ -100,6 +100,31 @@ const Options = () => {
     }
   }
 
+  const handleOneDateSelected = (date) => {
+    setMomentInstance([date, null])
+    setDateParams({
+      date: getDateFromMomentObject(date),
+    })
+  }
+
+  const handleRangeDateSelected = (date) => {
+    setMomentInstance(date)
+    setDateParams({
+      startDate: getDateFromMomentObject(date[0]),
+      endDate: getDateFromMomentObject(date[1]),
+    })
+  }
+
+  const handlePeriodSelector = (e) => setDateRange(e.target.value)
+
+  const handleOptionsSelector = (e) => {
+    const optionSelected = downloadOptions.find(
+      ({ value }) => value === e.target.value
+    )
+
+    setCurrentOptionSelected(optionSelected)
+  }
+
   // get date range component and set the md breakpoint to the download selector
   const getDateRangeComponent = (dateRange) => {
     let component = null
@@ -112,12 +137,7 @@ const Options = () => {
               label='Fecha seleccionada'
               showToolbar={false}
               value={momentInstance[0]}
-              onChange={(date) => {
-                setMomentInstance([date, null])
-                setDateParams({
-                  date: getDateFromMomentObject(date),
-                })
-              }}
+              onChange={handleOneDateSelected}
               renderInput={(props) => (
                 <TextField
                   fullWidth
@@ -141,13 +161,7 @@ const Options = () => {
               startText='Inicio'
               endText='Final'
               value={momentInstance}
-              onChange={(date) => {
-                setMomentInstance(date)
-                setDateParams({
-                  startDate: getDateFromMomentObject(date[0]),
-                  endDate: getDateFromMomentObject(date[1]),
-                })
-              }}
+              onChange={handleRangeDateSelected}
               renderInput={(startProps, endProps) => (
                 <>
                   <TextField fullWidth {...startProps} helperText='' />
@@ -186,7 +200,7 @@ const Options = () => {
               <InputLabel>Período</InputLabel>
               <Select
                 value={dateRange}
-                onChange={(e) => setDateRange(e.target.value)}
+                onChange={handlePeriodSelector}
                 label='Período'
               >
                 {dateRangeOptions.map(({ label, value }) => (
@@ -209,6 +223,7 @@ const Options = () => {
     window.open(
       `${apiUrl}/csv/${currentOptionSelected.value}/download?period=${dateRange}&params=${params}`
     )
+    resetPeriodOfTime()
   }
 
   const resetPeriodOfTime = () => {
@@ -239,13 +254,7 @@ const Options = () => {
               <InputLabel>¿Qué deseas descargar?</InputLabel>
               <Select
                 value={currentOptionSelected.value}
-                onChange={(e) => {
-                  setCurrentOptionSelected(
-                    downloadOptions.find(
-                      ({ value }) => value === e.target.value
-                    )
-                  )
-                }}
+                onChange={handleOptionsSelector}
                 label='¿Qué deseas descargar?'
               >
                 {downloadOptions.map(({ label, value }) => (
@@ -269,10 +278,7 @@ const Options = () => {
               size='large'
               color='primary'
               variant='contained'
-              onClick={() => {
-                downloadResource()
-                resetPeriodOfTime()
-              }}
+              onClick={downloadResource}
             >
               Descargar
             </Button>

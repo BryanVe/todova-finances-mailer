@@ -1,7 +1,8 @@
 /* eslint-disable react/no-multi-comp */
 import React from "react"
 import { matchPath, useLocation } from "react-router-dom"
-import { List, makeStyles } from "@material-ui/core"
+import PropTypes from "prop-types"
+import { List, makeStyles, Typography } from "@material-ui/core"
 import clsx from "clsx"
 
 import { NavigationListItem } from "./components"
@@ -67,16 +68,24 @@ const reduceChildRoutes = (props) => {
 }
 
 const Navigation = (props) => {
-  const { pages, className, component: Component, ...rest } = props
+  const { title, pages, className, component: Component, ...rest } = props
 
   const classes = useStyles()
   const location = useLocation()
 
   return (
     <Component {...rest} className={clsx(classes.root, className)}>
+      {title && <Typography variant='overline'>{title}</Typography>}
       <NavigationList depth={0} pages={pages} router={location} />
     </Component>
   )
+}
+
+Navigation.propTypes = {
+  className: PropTypes.string,
+  component: PropTypes.any,
+  pages: PropTypes.array.isRequired,
+  title: PropTypes.string,
 }
 
 export default Navigation

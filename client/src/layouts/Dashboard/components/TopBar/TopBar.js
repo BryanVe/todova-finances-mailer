@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React from "react"
 import { Link as RouterLink, useHistory } from "react-router-dom"
+import PropTypes from "prop-types"
 import { useDispatch } from "react-redux"
 import {
   makeStyles,
@@ -35,8 +36,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-const TopBar = (props) => {
-  const { onOpenNavBarMobile, className, ...rest } = props
+const TopBar = ({ onOpenNavBarMobile, className, ...rest }) => {
   const classes = useStyles()
   const history = useHistory()
   const dispatch = useDispatch()
@@ -72,6 +72,11 @@ const TopBar = (props) => {
       </Toolbar>
     </AppBar>
   )
+}
+
+TopBar.propTypes = {
+  onOpenNavBarMobile: PropTypes.func,
+  className: PropTypes.string,
 }
 
 export default TopBar

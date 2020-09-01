@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.0.1
+
+### Fixed
+
+- The loading status of synchronize button has been fixed.
+
 ## 4.0.0
 
 ### Added

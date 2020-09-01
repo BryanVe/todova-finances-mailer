@@ -19,8 +19,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-const Auth = (props) => {
-  const { route } = props
+const Auth = ({ route }) => {
   const classes = useStyles()
   const loadingLogin = useSelector((state) => state.auth.loading)
 
