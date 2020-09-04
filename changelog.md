@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.0.2
+
+### Updated
+
+- Upgraded bl from `2.2.0` to `2.2.1` in `/server` (Dependabot alert).
+
 ## 4.0.1
 
 ### Fixed
