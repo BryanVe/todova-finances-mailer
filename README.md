@@ -30,6 +30,7 @@ Create an `.env` file inside server folder. It looks like:
 PORT=XXXX
 MONGO=<URI>
 ACCESS_TOKEN_SECRET=<secret>
+MANDRILL_APIKEY=<mandrill_apikey>
 ```
 
 Open a terminal and run the following commands:
@@ -59,7 +60,6 @@ Create an `.env` file inside client folder. It looks like:
 
 ```bash
 REACT_APP_APIURL=http://192.168.1.X:<SERVER_PORT>
-REACT_APP_DEFAULT_EMAIL=<email>
 ```
 
 Open a terminal and run the following commands:

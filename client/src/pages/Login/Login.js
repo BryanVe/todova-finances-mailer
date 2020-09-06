@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
 const Login = () => {
   const classes = useStyles()
 
-  if (getToken()) return <Redirect to='/overview' />
+  if (getToken()) return <Redirect to='/csv/download' />
 
   return (
     <React.Fragment>

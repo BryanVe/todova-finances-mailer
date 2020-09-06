@@ -1,6 +1,5 @@
 import BarChartRoundedIcon from "@material-ui/icons/BarChartRounded"
 import FileCopyRoundedIcon from "@material-ui/icons/FileCopyRounded"
-import DashboardRoundedIcon from "@material-ui/icons/DashboardRounded"
 import ListAltRoundedIcon from "@material-ui/icons/ListAltRounded"
 import GetAppRoundedIcon from "@material-ui/icons/GetAppRounded"
 import SettingsRoundedIcon from "@material-ui/icons/SettingsRounded"
@@ -11,11 +10,6 @@ export default [
   {
     title: "",
     pages: [
-      {
-        title: "Overview",
-        href: "/overview",
-        icon: DashboardRoundedIcon,
-      },
       {
         title: "CSV",
         href: "/csv",

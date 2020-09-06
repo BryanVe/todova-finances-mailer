@@ -1,6 +1,6 @@
 {
   "name": "server",
-  "version": "4.0.2",
+  "version": "4.1.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
@@ -10,7 +10,6 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
-    "crypto-js": "^4.0.0",
     "excel4node": "^1.7.2",
     "express": "^4.17.1",
     "handlebars": "^4.7.6",
@@ -21,7 +20,6 @@
     "moment": "^2.27.0",
     "moment-timezone": "^0.5.31",
     "mongoose": "^5.9.19",
-    "nodemailer": "^6.4.11",
     "puppeteer": "^5.2.1",
     "rimraf": "^3.0.2",
     "socket.io": "^2.3.0"

@@ -25,9 +25,9 @@ export const getPdfFilesRequest = () => ({
   type: GET_PDF_FILES.REQUEST,
 })
 
-export const getPdfFilesSuccess = (files, dateGenerated) => ({
+export const getPdfFilesSuccess = (files, notSentFiles, dateGenerated) => ({
   type: GET_PDF_FILES.SUCCESS,
-  payload: { files, dateGenerated },
+  payload: { files, notSentFiles, dateGenerated },
 })
 
 export const getPdfFilesError = (error) => ({
@@ -40,9 +40,9 @@ export const sendPdfFilesRequest = (options, stopSendingEmail) => ({
   payload: { options, stopSendingEmail },
 })
 
-export const sendPdfFilesSuccess = (message) => ({
-  type: SEND_PDF_FILES.REQUEST,
-  payload: message,
+export const sendPdfFilesSuccess = (message, files) => ({
+  type: SEND_PDF_FILES.SUCCESS,
+  payload: { message, files },
 })
 
 export const sendPdfFilesError = (error) => ({

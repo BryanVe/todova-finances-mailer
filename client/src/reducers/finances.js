@@ -37,12 +37,18 @@ const financesReducer = (state = initialState, action) => {
           ...state.pdfFiles,
           list: action.payload.files,
           dateGenerated: action.payload.dateGenerated,
+          notSentFiles: action.payload.notSentFiles,
           error: null,
         },
       }
     case SEND_PDF_FILES.SUCCESS:
       return {
         ...state,
+        pdfFiles: {
+          ...state.pdfFiles,
+          list: action.payload.files,
+          error: null,
+        },
         sendEmailFiles: {
           ...state.sendEmailFiles,
           sended: true,

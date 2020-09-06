@@ -12,49 +12,58 @@ import {
   getPdfFilesSuccess,
   getNotSentPdfFilesSuccess,
   getNotSentPdfFilesError,
+  sendPdfFilesSuccess,
+  sendPdfFilesError,
 } from "actions/finances"
 import { showMessage, getPdfFilesError, generatePdfFilesError } from "actions"
 
 function* generateFiles({ payload: { dates, stopLoading } }) {
   try {
-    const { data, generateDate } = yield call(
-      Post,
-      "/finances/pdf-files/generate",
-      dates
-    )
-    yield put(generatePdfFilesSuccess(data, generateDate))
-    yield put(showMessage("success", "Archivos generados correctamente"))
+    const {
+      status,
+      message,
+      data: { generateDate, files },
+    } = yield call(Post, "/finances/pdf-files/generate", dates)
+    yield put(generatePdfFilesSuccess(files, generateDate))
+    yield put(showMessage(status, message))
     stopLoading()
   } catch (error) {
-    yield put(generatePdfFilesError(error.message))
-    yield put(showMessage("error", "Ocurrió un error al generar los archivos"))
+    const { status, message } = error.response.data
+    yield put(generatePdfFilesError(message))
+    yield put(showMessage(status, message))
     stopLoading()
   }
 }
 
 function* getAllFiles() {
   try {
-    const { data, generateDate } = yield call(Get, "/finances/pdf-files")
-    yield put(getPdfFilesSuccess(data, generateDate))
-    yield put(showMessage("success", "Archivos cargados correctamente"))
+    const {
+      status,
+      message,
+      data: { generateDate, files, notSentFiles },
+    } = yield call(Get, "/finances/pdf-files")
+    yield put(getPdfFilesSuccess(files, notSentFiles, generateDate))
+    yield put(showMessage(status, message))
   } catch (error) {
-    yield put(getPdfFilesError(error.message))
-    yield put(showMessage("error", "Ocurrió un error al cargar los archivos"))
+    const { status, message } = error.response.data
+    yield put(getPdfFilesError(message))
+    yield put(showMessage(status, message))
   }
 }
 
 function* sendFiles({ payload: { options, stopSendingEmail } }) {
   try {
-    const { status, message } = yield call(
-      Post,
-      "/finances/pdf-files/send",
-      options
-    )
-    yield getAllFiles()
+    const {
+      status,
+      message,
+      data: { files },
+    } = yield call(Post, "/finances/pdf-files/send", options)
+    yield put(sendPdfFilesSuccess(message, files))
     yield put(showMessage(status, message))
     stopSendingEmail()
   } catch (error) {
     const { status, message } = error.response.data
+    yield put(sendPdfFilesError(message))
     yield put(showMessage(status, message))
     stopSendingEmail()
   }
@@ -62,23 +71,31 @@ function* sendFiles({ payload: { options, stopSendingEmail } }) {
 
 function* setNotSentFiles({ payload }) {
   try {
-    yield call(Post, "/finances/not-sent-files", payload)
-  } catch (error) {
-    yield put(
-      showMessage(
-        "error",
-        "Ocurrió un error al intentar añadir/remover a la lista de no enviados"
-      )
+    const { status, message } = yield call(
+      Post,
+      "/finances/not-sent-files",
+      payload
     )
+    yield put(showMessage(status, message))
+  } catch (error) {
+    const { status, message } = error.response.data
+    yield put(showMessage(status, message))
   }
 }
 
 function* getNotSentFiles() {
   try {
-    const data = yield call(Get, "/finances/not-sent-files")
-    yield put(getNotSentPdfFilesSuccess(data))
+    const {
+      status,
+      message,
+      data: { files },
+    } = yield call(Get, "/finances/not-sent-files")
+    yield put(getNotSentPdfFilesSuccess(files))
+    yield put(showMessage(status, message))
   } catch (error) {
-    yield put(getNotSentPdfFilesError(error.message))
+    const { status, message } = error.response.data
+    yield put(getNotSentPdfFilesError(message))
+    yield put(showMessage(status, message))
   }
 }
 

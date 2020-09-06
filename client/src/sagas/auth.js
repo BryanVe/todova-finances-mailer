@@ -21,7 +21,7 @@ function* registerUser({ payload: { newUser, history } }) {
     )
     yield put(registerUserSuccess(data, message))
     setToken(accessToken)
-    history.push("/overview")
+    history.push("/csv/download")
     yield put(
       showMessage(status, message, {
         position: { vertical: "bottom", horizontal: "left" },
@@ -50,7 +50,7 @@ function* loginUser({ payload: { credentials, history } }) {
     )
     yield put(loginUserSuccess(data, message))
     setToken(accessToken)
-    history.push("/overview")
+    history.push("/csv/download")
     yield put(
       showMessage(status, message, {
         position: { vertical: "bottom", horizontal: "left" },

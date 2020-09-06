@@ -1,5 +1,16 @@
 # Changelog
 
+## 4.1.0
+
+### Removed
+
+- [`nodemailer`](https://www.npmjs.com/package/nodemailer) was removed from the `package.json` server.
+- Now, the frontend doesn't have to send the sender credentials to send the mails to the drivers.
+
+### Updated
+
+- Now the server sends the mails to the drivers via [`Mandrill`](https://mailchimp.com/features/transactional-email/?gclid=Cj0KCQjw7sz6BRDYARIsAPHzrNLt8dGqnh1XCR7wGLQzieaOhfFBSf8cL88s9AJta0alsWsJa4CfNSgaAv87EALw_wcB&gclsrc=aw.ds) using their `node.js` API, [`mandrill-api`](https://www.npmjs.com/package/mandrill-api).
+
 ## 4.0.2
 
 ### Updated

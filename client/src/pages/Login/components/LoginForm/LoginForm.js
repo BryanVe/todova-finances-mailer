@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from "react"
 import validate from "validate.js"
 import clsx from "clsx"
-import { makeStyles } from "@material-ui/styles"
-import { Button, TextField } from "@material-ui/core"
+import { makeStyles, Button, TextField } from "@material-ui/core"
 
 import { useHistory } from "react-router-dom"
 import { loginUserRequest } from "actions"

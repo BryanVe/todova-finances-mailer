@@ -6,7 +6,6 @@ import { Redirect } from "react-router-dom"
 import AuthLayout from "./layouts/Auth"
 import DashboardLayout from "./layouts/Dashboard"
 import ErrorLayout from "./layouts/Error"
-import OverviewView from "./pages/Overview"
 import DownloadCSVView from "./pages/CSV"
 import DatabaseConfigView from "./pages/Configuration"
 import DriverFilesView from "./pages/Finances"
@@ -68,11 +67,6 @@ const routes = [
     route: "*",
     component: DashboardLayout,
     routes: [
-      {
-        path: "/overview",
-        exact: true,
-        render: protectRoute(OverviewView),
-      },
       {
         path: "/csv/download",
         exact: true,

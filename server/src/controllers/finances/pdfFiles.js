@@ -6,9 +6,10 @@ const hb = require("handlebars")
 const moment = require("moment")
 const mkdirp = require("mkdirp")
 const rimraf = require("rimraf")
-const nodemailer = require("nodemailer")
 const pdfFolder = path.resolve(__dirname, "../../pdfs")
 const getTemplateHtml = require("./template")
+const getMandrillConfig = require("../../mandrill/config")
+const mandrillApiKey = require("../../mandrill/keys")
 
 // models
 const Customer = require("../../models/Customer")
@@ -20,7 +21,15 @@ const DriverInfo = require("../../models/DriverInfo")
 const DateGenerated = require("../../models/DateGenerated")
 const NotSentFile = require("../../models/NotSentFile")
 
-const { getTimeInFormat } = require("../../functions/utils")
+const {
+  getTimeInFormat,
+  convertFileToBase64,
+} = require("../../functions/utils")
+
+// mandrill --------
+let mandrill = require("mandrill-api")
+let mandrillClient = new mandrill.Mandrill(mandrillApiKey)
+// -----------------
 
 const generatePdf = async (data, fileName) => {
   try {
@@ -75,55 +84,52 @@ const groupingShipmentsByDriverId = (shipments) => {
   return driverShipments
 }
 
-const sendEmail = async (credentials, emailTo, filename, textOptions) => {
-  try {
-    let transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: credentials.user,
-        pass: credentials.password,
+const sendEmail = (email, fileName, textOptions = {}) => {
+  return new Promise(async (resolve, reject) => {
+    // textOptions = {beginDate, endDate, payDate}
+    const filePath = path.join(pdfFolder, fileName)
+    const fileInBase64 = await convertFileToBase64(filePath)
+    const emailTo = [
+      {
+        // TODO: set the driver email
+        // email,
+        email: "bryan.ve.bv@gmail.com",
+        // TODO: show the driver name
+        name: "Bryan Vera",
+        type: "to",
       },
-      tls: {
-        rejectUnauthorized: false,
+    ]
+    const attachments = [
+      {
+        type: "application/pdf",
+        name: "adjunto.pdf",
+        content: fileInBase64,
       },
-    })
+    ]
 
-    let header =
-      '<div style="font-size:12.8px;color:rgb(76,17,48);width:749.688px;margin-left:41.6406px;font-family:&quot;open sans&quot;,sans-serif;padding-bottom:20px;float:left"><img src="https://s3.sa-east-1.amazonaws.com/todovapersonal/logoMail.png" alt="TodoVa Logo" class="CToWUd a6T" tabindex="0"><br><br><img src="https://s3.sa-east-1.amazonaws.com/todovapersonal/todovadriver.jpg" alt="TodoVa Driver" width="454" height="155" class="CToWUd a6T" tabindex="1"><div class="a6S" dir="ltr" style="opacity: 0.01; left: 407.625px; top: 180px;"><div id=":v2" class="T-I J-J5-Ji aQv T-I-ax7 L3 a5q" role="button" tabindex="0" aria-label="Descargar el archivo adjunto image.png" data-tooltip-class="a1V" data-tooltip="Descargar"><div class="aSK J-J5-Ji aYr"></div></div><div id=":v3" class="T-I J-J5-Ji aQv T-I-ax7 L3 a5q" role="button" tabindex="0" aria-label="Guardar el archivo adjunto image.png en Drive" data-tooltip-class="a1V" data-tooltip="Guardar en Drive"><div class="wtScjd J-J5-Ji aYr aQu"><div class="T-aT4" style="display: none;"><div></div><div class="T-aT4-JX"></div></div></div></div></div><br></div>'
-    let body = `<div style="background-image:initial;background-position:initial;background-size:initial;background-repeat:initial;background-origin:initial;background-clip:initial;width:749.688px;margin-left:41.6406px;padding-left:0px;padding-right:0px;padding-bottom:20px;margin-bottom:20px;float:left"><span style="font-size:12.8px"><font face="trebuchet ms, sans-serif" color="#4c1130"></font></span><p style="color:rgb(76,17,48);font-family:&quot;trebuchet ms&quot;,sans-serif;font-size:18px;width:674.719px;margin-left:37.4844px;float:left"><font face="trebuchet ms, sans-serif">Estimad@:</font></p><span style="font-size:12.8px"><font face="trebuchet ms, sans-serif" color="#4c1130"></font></span><p style="color:rgb(76,17,48);font-family:&quot;trebuchet ms&quot;,sans-serif;font-size:12.8px;width:674.719px;margin-left:37.4844px;float:left;margin-top:0px"><font face="trebuchet ms, sans-serif" color="#666666">Esperamos que te encuentres bien!&nbsp;</font></p><p style="color:rgb(76,17,48);font-family:&quot;trebuchet ms&quot;,sans-serif;font-size:12.8px;width:674.719px;margin-left:37.4844px;float:left;margin-top:0px"><font face="trebuchet ms, sans-serif" color="#666666">Te adjuntamos tu reporte de envíos&nbsp;correspondientes al período del ${getTimeInFormat(
-      textOptions.beginDate,
-      "literal"
-    )} al ${getTimeInFormat(
-      textOptions.endDate,
-      "literal"
-    )}.&nbsp;</font></p><p style="color:rgb(76,17,48);font-family:&quot;trebuchet ms&quot;,sans-serif;font-size:12.8px;width:674.719px;margin-left:37.4844px;float:left;margin-top:0px"><font face="trebuchet ms, sans-serif" color="#666666">Te informamos que se realizarán las transferencias el día ${getTimeInFormat(
-      textOptions.payDate,
-      "literal"
-    )}, entre las 12:00 y 18:00 horas.</font></p><p style="color:rgb(76,17,48);font-family:&quot;trebuchet ms&quot;,sans-serif;font-size:12.8px;width:674.719px;margin-left:37.4844px;float:left;margin-top:0px"><span style="color:rgb(102,102,102)">Si tienes dudas escríbenos, estamos aquí para ayudarte.</span></p><p style="width:674.719px;margin-left:37.4844px;float:left;margin-top:0px"><font face="trebuchet ms, sans-serif" color="#666666"><font color="#4c1130"><span style="font-size:12.8px">Aprovechamos de </span></font><span style="font-size:12.8px">agradecer</span><font color="#4c1130"><span style="font-size:12.8px">&nbsp;que seas parte de TodoVa! Y contarte que seguimos trabajando a toda máquina para que la cantidad de envíos siga aumentando.</span></font></font></p></div>`
-    let footer =
-      '<div style="font-size:12.8px;color:rgb(76,17,48);font-family:&quot;trebuchet ms&quot;,sans-serif;background-image:initial;background-position:initial;background-size:initial;background-repeat:initial;background-origin:initial;background-clip:initial;width:749.688px;margin-left:41.6406px;padding-left:0px;padding-right:0px;padding-bottom:20px;margin-bottom:20px;float:left"><p style="width:674.719px;margin-left:37.4844px;float:left;font-size:14px;margin-top:0px"><strong style="font-size:small"><font color="#4c1130" face="trebuchet ms, sans-serif" size="4">Saludos! Equipo TodoVa!</font></strong></p></div>'
+    const mandrillConfig = getMandrillConfig(emailTo, attachments)
 
-    let options = {
-      from: `"Finanzas TodoVa" <${credentials.user}>`,
-      // TODO -> to: emailTo,
-      to: "gverae@uni.pe",
-      sender: credentials.user,
-      replyTo: credentials.user,
-      subject: "Reporte de Envíos",
-      html: `${header}${body}${footer}`,
-      attachments: [
-        {
-          filename: "adjunto.pdf",
-          path: path.resolve(__dirname, `${pdfFolder}/${filename}`),
-        },
-      ],
-    }
+    mandrillClient.messages.sendTemplate(
+      mandrillConfig,
+      (res) => {
+        // first index because we are sending just to one recipient
+        const result = res[0]
+        if (result.status === "rejected" || result.status === "invalid")
+          return reject("The email is invalid or was rejected")
 
-    const result = await transporter.sendMail(options)
-    return result
-  } catch (error) {
-    throw error
-  }
+        return resolve()
+        /* response example:
+        [{
+                "email": "recipient.email@example.com",
+                "status": "sent",
+                "reject_reason": "hard-bounce",
+                "_id": "abc123abc123abc123abc123abc123"
+            }]
+        */
+      },
+      (e) => reject("A mandrill error occurred: " + e.name + " - " + e.message)
+    )
+  })
 }
 
 module.exports = {
@@ -171,7 +177,11 @@ module.exports = {
           .lean()
         return shipments
       } catch (error) {
-        res.status(500).send("Database error")
+        return res.status(500).json({
+          status: "error",
+          message: "Ocurrió un error en la base de datos",
+          data: {},
+        })
       }
     }
 
@@ -183,7 +193,11 @@ module.exports = {
           return await Enterprise.findOne({ _id: customerId })
         else return {}
       } catch (error) {
-        res.status(500).send("Database error")
+        return res.status(500).json({
+          status: "error",
+          message: "Ocurrió un error en la base de datos",
+          data: {},
+        })
       }
     }
 
@@ -191,7 +205,11 @@ module.exports = {
       try {
         return await Driver.findOne({ _id: driverId })
       } catch (error) {
-        res.status(500).send("Database error")
+        return res.status(500).json({
+          status: "error",
+          message: "Ocurrió un error en la base de datos",
+          data: {},
+        })
       }
     }
 
@@ -273,7 +291,11 @@ module.exports = {
           },
         }).sort({ startTime: "ascending" })
       } catch (error) {
-        res.status(500).send("Database error")
+        return res.status(500).json({
+          status: "error",
+          message: "Ocurrió un error en la base de datos",
+          data: {},
+        })
       }
     }
 
@@ -397,14 +419,14 @@ module.exports = {
 
     await makeDriverPdfFiles(driverShipments)
 
-    console.log("Pdfs have been generated successfully\n\n")
+    console.log("Los pdfs fueron generados correctamente")
 
-    const files = await fs
+    const fileNames = await fs
       .readdirSync(pdfFolder)
       .filter((file) => file.indexOf(".pdf") >= 0)
 
-    const data = await Promise.all(
-      files.map(
+    const files = await Promise.all(
+      fileNames.map(
         async (file) =>
           await DriverInfo.findOne({ email: file.split(".pdf")[0] })
       )
@@ -418,32 +440,54 @@ module.exports = {
     })
 
     res.json({
-      generateDate: {
-        beginDate,
-        endDate,
-        payDate,
+      status: "success",
+      message: "Los archivos fueron generados correctamente",
+      data: {
+        generateDate: {
+          beginDate,
+          endDate,
+          payDate,
+        },
+        files,
       },
-      data,
     })
 
     socket.broadcast.emit("pdf-generating", false)
   },
 
   getFiles: async (req, res) => {
-    const files = await fs
-      .readdirSync(pdfFolder)
-      .filter((file) => file.indexOf(".pdf") >= 0)
+    try {
+      const fileNames = await fs
+        .readdirSync(pdfFolder)
+        .filter((file) => file.indexOf(".pdf") >= 0)
 
-    const generateDate = (await DateGenerated.find({}))[0]
-
-    const data = await Promise.all(
-      files.map(
-        async (file) =>
-          await DriverInfo.findOne({ email: file.split(".pdf")[0] })
+      const files = await Promise.all(
+        fileNames.map(
+          async (file) =>
+            await DriverInfo.findOne({ email: file.split(".pdf")[0] })
+        )
       )
-    )
 
-    res.json({ generateDate, data })
+      const notSentFiles = await NotSentFile.find({})
+      const notSentFileNames = notSentFiles.map((doc) => doc.file)
+
+      const generateDate = (await DateGenerated.find({}))[0]
+
+      return res.status(200).json({
+        status: "success",
+        message:
+          files.length > 0
+            ? "Los archivos fueron cargados correctamente"
+            : "No hay archivos generados en la base de datos",
+        data: { generateDate, files, notSentFiles: notSentFileNames },
+      })
+    } catch (error) {
+      return res.status(500).json({
+        status: "error",
+        message: "Ocurrió un error al cargar los archivos",
+        data: {},
+      })
+    }
   },
 
   getOneFile: (req, res) => {
@@ -454,10 +498,13 @@ module.exports = {
 
   sendFiles: async (req, res) => {
     const filesToSend = req.body.files
+    // to modify the params of the mandrill template (dates)
+    // const textOptions = req.body.textOptions
 
     const notSentFiles = (await NotSentFile.find({})).map((doc) => doc.file)
 
     let isAllSended = true
+
     for (let fileName of filesToSend) {
       if (notSentFiles.includes(fileName)) continue
 
@@ -465,44 +512,47 @@ module.exports = {
       const driverInfo = await DriverInfo.findOne({ email })
 
       if (driverInfo.isEmailSended) continue
-
       try {
-        let sendAction = await sendEmail(
-          req.body.credentials,
-          email,
-          fileName,
-          req.body.textOptions
+        await sendEmail(email, fileName)
+        await DriverInfo.findOneAndUpdate(
+          { _id: driverInfo._id },
+          { isEmailSended: true }
         )
-        if (sendAction.accepted.length > 0)
-          await DriverInfo.findOneAndUpdate(
-            { _id: driverInfo._id },
-            { isEmailSended: true }
-          )
-      } catch (err) {
-        if (err.command && err.command === "AUTH PLAIN")
-          return res.status(500).json({
-            status: "error",
-            message: "La contraseña ingresada es incorrecta",
-            data: {},
-          })
+      } catch (error) {
+        console.log(error)
         isAllSended = false
-        console.log(err)
       }
     }
 
+    const fileNames = await fs
+      .readdirSync(pdfFolder)
+      .filter((file) => file.indexOf(".pdf") >= 0)
+
+    const files = await Promise.all(
+      fileNames.map(
+        async (file) =>
+          await DriverInfo.findOne({ email: file.split(".pdf")[0] })
+      )
+    )
+    const data = {
+      files,
+    }
+
     if (isAllSended) {
-      console.log("Todos los correos fueron enviados exitósamente")
+      const message = "Todos los correos fueron enviados correctamente"
+      console.log(message)
       res.status(200).json({
         status: "success",
-        message: "Todos los correos fueron enviados exitósamente",
-        data: {},
+        message,
+        data,
       })
     } else {
-      console.log("No todos los correos fueron enviados exitósamente")
+      const message = "No todos los correos fueron enviados correctamente"
+      console.log(message)
       res.status(500).json({
         status: "error",
-        message: "No todos los correos fueron enviados exitósamente",
-        data: {},
+        message,
+        data,
       })
     }
   },
@@ -510,7 +560,6 @@ module.exports = {
   setNotSentFiles: async (req, res) => {
     try {
       const files = req.body.files
-
       await Promise.all(
         files.map(async (file) => {
           if (req.body.operation === "set") await NotSentFile.create({ file })
@@ -519,16 +568,47 @@ module.exports = {
         })
       )
 
-      res.status(200).end()
+      return res.status(200).json({
+        status: "success",
+        message:
+          req.body.operation === "set"
+            ? "Se añadió a la lista de no enviados correctamente"
+            : "Se removió de la lista de no enviados correctamente",
+        data: {},
+      })
     } catch (error) {
-      res.status(500).end()
+      return res.status(500).json({
+        status: "error",
+        message:
+          req.body.operation === "set"
+            ? "Ocurrió un error al intentar añadir a la lista de no enviados"
+            : "Ocurrió un error al intentar remover de la lista de no enviados",
+        data: {},
+      })
     }
   },
 
   getNotSentFiles: async (req, res) => {
-    const notSentFiles = await NotSentFile.find({})
-    const files = notSentFiles.map((doc) => doc.file)
+    try {
+      const notSentFiles = await NotSentFile.find({})
+      const files = notSentFiles.map((doc) => doc.file)
 
-    res.json(files)
+      return res.status(200).json({
+        status: "success",
+        message:
+          files.length > 0
+            ? "Los archivos no enviados fueron cargados correctamente"
+            : "No existe archivos no enviados en la base de datos",
+        data: {
+          files,
+        },
+      })
+    } catch (error) {
+      return res.status(500).json({
+        status: "error",
+        message: "Ocurrió un error al cargar los archivos no enviados",
+        data: {},
+      })
+    }
   },
 }

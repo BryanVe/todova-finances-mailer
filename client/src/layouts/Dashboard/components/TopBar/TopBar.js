@@ -10,6 +10,8 @@ import {
   Toolbar,
   Hidden,
   colors,
+  Button,
+  Typography,
 } from "@material-ui/core"
 import MenuIcon from "@material-ui/icons/Menu"
 import clsx from "clsx"
@@ -51,18 +53,20 @@ const TopBar = ({ onOpenNavBarMobile, className, ...rest }) => {
     <AppBar {...rest} className={clsx(classes.root, className)} color='primary'>
       <Toolbar>
         <RouterLink to='/'>
-          <h2 className={classes.logo}>TodoVa</h2>
+          <Typography className={classes.logo}>TodoVa</Typography>
         </RouterLink>
         <div className={classes.flexGrow} />
 
         <Hidden mdDown>
-          <IconButton
-            className={classes.logoutButton}
-            color='inherit'
+          <Button
             onClick={handleLogout}
+            color='inherit'
+            size='large'
+            className={classes.logoutButton}
+            startIcon={<ExitToAppRoundedIcon className={classes.logoutIcon} />}
           >
-            <ExitToAppRoundedIcon className={classes.logoutIcon} />
-          </IconButton>
+            Salir
+          </Button>
         </Hidden>
         <Hidden lgUp>
           <IconButton color='inherit' onClick={onOpenNavBarMobile}>

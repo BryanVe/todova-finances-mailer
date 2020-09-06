@@ -1,34 +1,15 @@
-const { getTimeInFormat, verifyPeriodOfTime } = require("./date")
-const {
-  formatFloatStr,
-  normalize,
-  translateDeliveryType,
-  translateMonth,
-  translateRequestState,
-  translateRequestType,
-} = require("./string")
-const { downloadResource } = require("./csv")
-const {
-  getBankCode,
-  getRutDigits,
-  getRutVeriferDigit,
-  getDriverSimpleName,
-} = require("./driver")
-const { saveExcel } = require("./excel")
+const date = require("./date")
+const string = require("./string")
+const csv = require("./csv")
+const driver = require("./driver")
+const excel = require("./excel")
+const pdf = require("./pdf")
 
 module.exports = {
-  getTimeInFormat,
-  verifyPeriodOfTime,
-  formatFloatStr,
-  normalize,
-  translateDeliveryType,
-  translateMonth,
-  translateRequestState,
-  translateRequestType,
-  downloadResource,
-  getBankCode,
-  getRutDigits,
-  getRutVeriferDigit,
-  getDriverSimpleName,
-  saveExcel,
+  ...date,
+  ...string,
+  ...csv,
+  ...driver,
+  ...excel,
+  ...pdf,
 }

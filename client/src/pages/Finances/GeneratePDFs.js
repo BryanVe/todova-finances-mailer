@@ -9,6 +9,7 @@ import {
   Button,
   LinearProgress,
 } from "@material-ui/core"
+
 import {
   DateRangePicker,
   DateRangeDelimiter,
@@ -19,11 +20,7 @@ import PictureAsPdfRoundedIcon from "@material-ui/icons/PictureAsPdfRounded"
 import AccountBalanceRoundedIcon from "@material-ui/icons/AccountBalanceRounded"
 
 import TableGenerated from "pages/Finances/components/TableGenerated"
-import {
-  generatePdfFilesRequest,
-  getPdfFilesRequest,
-  getNotSentPdfFilesRequest,
-} from "actions"
+import { generatePdfFilesRequest, getPdfFilesRequest } from "actions"
 import { getDateFromMomentObject } from "lib/helpers"
 import { apiUrl } from "config/development"
 
@@ -104,7 +101,6 @@ const GeneratePDFs = () => {
 
   useEffect(() => {
     dispatch(getPdfFilesRequest())
-    dispatch(getNotSentPdfFilesRequest())
   }, [dispatch])
 
   return (

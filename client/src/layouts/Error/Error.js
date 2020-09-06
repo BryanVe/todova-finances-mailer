@@ -1,7 +1,6 @@
 import React, { Suspense } from "react"
 import { renderRoutes } from "react-router-config"
-import { makeStyles } from "@material-ui/styles"
-import { LinearProgress } from "@material-ui/core"
+import { makeStyles, LinearProgress } from "@material-ui/core"
 
 const useStyles = makeStyles(() => ({
   root: {

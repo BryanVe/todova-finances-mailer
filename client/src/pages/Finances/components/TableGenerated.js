@@ -1,7 +1,6 @@
 import React, { useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
 
-import MuiAlert from "@material-ui/lab/Alert"
 import DoneRoundedIcon from "@material-ui/icons/DoneRounded"
 import CloseRoundedIcon from "@material-ui/icons/CloseRounded"
 import EmailRoundedIcon from "@material-ui/icons/EmailRounded"
@@ -15,9 +14,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
-  TextField,
   DialogActions,
-  Snackbar,
   Backdrop,
   CircularProgress,
   makeStyles,
@@ -34,18 +31,8 @@ import {
 } from "actions/finances"
 import IconButtonWithTooltip from "components/IconButtonWithTooltip"
 
-const defaultEmail = process.env.REACT_APP_DEFAULT_EMAIL
-const sendFileSnackbarOptions = {
-  position: { vertical: "top", horizontal: "center" },
-  duration: 1800,
-}
-
 const downloadOneFile = (email) => {
   window.open(`${apiUrl}/finances/pdf-files/${email}.pdf`)
-}
-
-const Alert = (props) => {
-  return <MuiAlert elevation={6} variant='filled' {...props} />
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -61,13 +48,7 @@ const TableGenerated = ({ loading }) => {
   const [openConfirmSendEmailDialog, setOpenConfirmSendEmailDialog] = useState(
     false
   )
-  const [passwordField, setPasswordField] = useState("")
   const [selectedRows, setSelectedRows] = useState([])
-  const [sendFileSnackbar, setSendFileSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "",
-  })
   const [isSendingEmail, setIsSendingEmail] = useState(false)
   const { list: files, dateGenerated, notSentFiles } = useSelector(
     (state) => state.finances.pdfFiles
@@ -166,20 +147,13 @@ const TableGenerated = ({ loading }) => {
   )
 
   const sendFiles = () => {
-    if (passwordField.length === 0) return
-
     const files = selectedRows.map((email) => getFileNameFromEmail(email))
     const options = {
       files,
-      credentials: {
-        user: defaultEmail,
-        password: passwordField,
-      },
       textOptions: dateGenerated,
     }
     dispatch(sendPdfFilesRequest(options, stopSendingEmail))
     setIsSendingEmail(true)
-    setPasswordField("")
     handleCloseSendDialog()
   }
 
@@ -187,21 +161,9 @@ const TableGenerated = ({ loading }) => {
     setIsSendingEmail(false)
   }
 
-  const handleCloseSendFileSnackbar = (event, reason) => {
-    if (reason === "clickaway") {
-      return
-    }
-    setSendFileSnackbar((prevState) => ({
-      ...prevState,
-      open: false,
-    }))
-  }
-
   const handleCloseConfirmSendEmailDialog = () => {
     setOpenConfirmSendEmailDialog(false)
   }
-
-  const handlePasswordField = (event) => setPasswordField(event.target.value)
 
   const handleCloseSendDialog = () => setOpenConfirmSendEmailDialog(false)
 
@@ -246,50 +208,17 @@ const TableGenerated = ({ loading }) => {
                 ? `¿Desea enviar los ${selectedRows.length} archivo(s)
               seleccionado(s)?`
                 : "¿Desea enviar este archivo?"}
-              . Por favor ingrese su contraseña.
             </DialogContentText>
-            <TextField
-              autoFocus
-              margin='dense'
-              id='send-email'
-              label='Email'
-              type='email'
-              fullWidth
-              value={defaultEmail}
-              disabled
-            />
-            <TextField
-              autoFocus
-              margin='dense'
-              id='send-password'
-              label='Contraseña'
-              type='password'
-              fullWidth
-              onChange={handlePasswordField}
-            />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleCloseSendDialog} color='primary'>
-              Cancelar
-            </Button>
-            <Button onClick={sendFiles} color='primary'>
+            <Button onClick={sendFiles} variant='contained' color='primary'>
               Enviar
+            </Button>
+            <Button onClick={handleCloseSendDialog} color='secondary'>
+              Cancelar
             </Button>
           </DialogActions>
         </Dialog>
-        <Snackbar
-          anchorOrigin={sendFileSnackbarOptions.position}
-          open={sendFileSnackbar.open}
-          autoHideDuration={sendFileSnackbarOptions.duration}
-          onClose={handleCloseSendFileSnackbar}
-        >
-          <Alert
-            onClose={handleCloseSendFileSnackbar}
-            severity={sendFileSnackbar.severity}
-          >
-            {sendFileSnackbar.message}
-          </Alert>
-        </Snackbar>
         <Backdrop className={classes.backdrop} open={isSendingEmail}>
           <CircularProgress color='inherit' />
         </Backdrop>
