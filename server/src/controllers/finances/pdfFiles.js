@@ -457,6 +457,8 @@ module.exports = {
 
   getFiles: async (req, res) => {
     try {
+      await mkdirp(pdfFolder)
+
       const fileNames = await fs
         .readdirSync(pdfFolder)
         .filter((file) => file.indexOf(".pdf") >= 0)

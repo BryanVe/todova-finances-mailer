@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.1.0a
+
+### Fixed
+
+- Error message in Generate view was fixed.
+
 ## 4.1.0
 
 ### Removed
