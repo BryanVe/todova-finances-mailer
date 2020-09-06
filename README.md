@@ -31,6 +31,9 @@ PORT=XXXX
 MONGO=<URI>
 ACCESS_TOKEN_SECRET=<secret>
 MANDRILL_APIKEY=<mandrill_apikey>
+MANDRILL_TEMPLATE_NAME=<mandrill_template_name>
+MANDRILL_SENDER_EMAIL=<mandrill_sender_email>
+MANDRILL_SENDER_NAME=<mandrill_sender_name>
 ```
 
 Open a terminal and run the following commands:
