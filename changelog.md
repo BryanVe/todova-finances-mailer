@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.1.1
+
+### Updated
+
+- The send message depends if we send a mail to one driver or more than one driver.
+
 ## 4.1.0a
 
 ### Fixed

@@ -541,7 +541,10 @@ module.exports = {
     }
 
     if (isAllSended) {
-      const message = "Todos los correos fueron enviados correctamente"
+      const message =
+        filesToSend.length > 1
+          ? "Todos los correos fueron enviados correctamente"
+          : "El correo seleccionado se envió correctamente"
       console.log(message)
       res.status(200).json({
         status: "success",
@@ -549,7 +552,10 @@ module.exports = {
         data,
       })
     } else {
-      const message = "No todos los correos fueron enviados correctamente"
+      const message =
+        filesToSend.length > 1
+          ? "No todos los correos fueron enviados correctamente"
+          : "Ocurrió un error al intentar enviar el correo seleccionado"
       console.log(message)
       res.status(500).json({
         status: "error",
