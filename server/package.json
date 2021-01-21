@@ -22,7 +22,7 @@
     "mongoose": "^5.9.19",
     "puppeteer": "^5.2.1",
     "rimraf": "^3.0.2",
-    "socket.io": "^2.3.0"
+    "socket.io": "^2.4.0"
   },
   "devDependencies": {
     "dotenv": "^8.2.0",
